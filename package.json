@@ -1,6 +1,6 @@
 {
   "name": "ai-coding-agent",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "description": "An AI-powered coding agent that can analyze, modify, and generate code",
   "main": "src/index.js",
   "type": "module",
