@@ -1,0 +1,65 @@
+name-template: 'v$RESOLVED_VERSION'
+tag-template: 'v$RESOLVED_VERSION'
+
+categories:
+  - title: '🚀 Features'
+    labels:
+      - feature
+      - enhancement
+  - title: '🐛 Fixes'
+    labels:
+      - fix
+      - bug
+      - bugfix
+  - title: '🔐 Security'
+    labels:
+      - security
+  - title: '⚡ Performance'
+    labels:
+      - performance
+  - title: '🧰 Chore & Maintenance'
+    labels:
+      - chore
+      - maintenance
+      - dependencies
+  - title: '🧪 CI/CD'
+    labels:
+      - ci
+      - build
+  - title: '📝 Documentation'
+    labels:
+      - docs
+      - documentation
+
+change-template: '- $TITLE (#$NUMBER) @$AUTHOR'
+change-title-escapes: '\<*_&'
+
+version-resolver:
+  major:
+    labels:
+      - major
+      - breaking
+      - breaking-change
+  minor:
+    labels:
+      - minor
+      - feature
+      - enhancement
+  patch:
+    labels:
+      - patch
+      - fix
+      - bug
+      - chore
+      - docs
+      - ci
+      - security
+  default: patch
+
+template: |
+  ## What’s Changed
+  $CHANGES
+
+  ## Contributors
+  $CONTRIBUTORS
+

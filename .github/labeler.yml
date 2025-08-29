@@ -1,0 +1,25 @@
+docs:
+  - changed-files:
+      - any-glob-to-any-file: 'docs/**'
+      - any-glob-to-any-file: 'README.md'
+      - any-glob-to-any-file: 'CHANGELOG.md'
+      - any-glob-to-any-file: 'CONTRIBUTING.md'
+
+ci:
+  - changed-files:
+      - any-glob-to-any-file: '.github/**'
+      - any-glob-to-any-file: 'test/**'
+
+dependencies:
+  - changed-files:
+      - any-glob-to-any-file: 'package.json'
+      - any-glob-to-any-file: 'package-lock.json'
+      - any-glob-to-any-file: '.npmrc'
+
+web:
+  - changed-files:
+      - any-glob-to-any-file: 'web/**'
+
+backend:
+  - changed-files:
+      - any-glob-to-any-file: 'src/**'

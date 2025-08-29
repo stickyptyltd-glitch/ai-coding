@@ -1,0 +1,11 @@
+# CODEOWNERS
+# Update the GitHub handles below to your team or maintainers.
+
+# Global default owners
+* @your-github-username
+
+# Paths (override as needed)
+src/** @your-github-username
+web/** @your-github-username
+.github/** @your-github-username
+

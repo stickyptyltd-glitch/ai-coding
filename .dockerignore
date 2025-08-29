@@ -1,0 +1,9 @@
+node_modules
+npm-debug.log
+.git
+.github
+data
+web/node_modules
+*.local
+.env
+
