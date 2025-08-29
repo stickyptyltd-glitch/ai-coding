@@ -7,8 +7,11 @@ import { CodingAgent } from './agent.js';
 import { FileSystem } from './filesystem.js';
 import dotenv from 'dotenv';
 import fs from 'fs';
+import { ensureLicenseOrExit } from './license.js';
 
 dotenv.config();
+// Enforce license before actions (skips in tests)
+ensureLicenseOrExit();
 
 const program = new Command();
 

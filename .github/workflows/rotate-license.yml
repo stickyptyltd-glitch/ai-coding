@@ -1,0 +1,77 @@
+name: Rotate License Token
+
+on:
+  schedule:
+    - cron: '0 2 * * 1' # Mondays at 02:00 UTC
+  workflow_dispatch:
+    inputs:
+      env_name:
+        description: 'Environment to update'
+        default: 'production'
+        required: true
+      days:
+        description: 'Token validity in days'
+        default: '7'
+        required: true
+      subject:
+        description: 'License subject (email/user)'
+        default: 'ops@st1cky.com'
+        required: true
+      audience:
+        description: 'Audience claim'
+        default: 'st1cky Pty Ltd'
+        required: true
+      issuer:
+        description: 'Issuer claim'
+        default: 'st1cky Pty Ltd'
+        required: true
+
+permissions:
+  contents: read
+
+jobs:
+  rotate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Write private key
+        shell: bash
+        run: |
+          mkdir -p keys
+          printf "%s" "${{ secrets.LICENSE_PRIVATE_KEY_PEM }}" > keys/private.pem
+          chmod 600 keys/private.pem
+
+      - name: Generate license token
+        id: sign
+        run: |
+          TOKEN=$(node scripts/sign-license.js \
+            --key=keys/private.pem \
+            --sub='${{ github.event.inputs.subject || 'ops@st1cky.com' }}' \
+            --aud='${{ github.event.inputs.audience || 'st1cky Pty Ltd' }}' \
+            --iss='${{ github.event.inputs.issuer || 'st1cky Pty Ltd' }}' \
+            --product=ai-coding-agent \
+            --expDays=${{ github.event.inputs.days || '7' }})
+          echo "token=$TOKEN" >> "$GITHUB_OUTPUT"
+
+      - name: Update environment secret LICENSE_KEY
+        uses: peter-evans/create-or-update-secret@v2
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          env-name: ${{ github.event.inputs.env_name || 'production' }}
+          secret-name: LICENSE_KEY
+          secret-value: ${{ steps.sign.outputs.token }}
+
+      - name: Update repository secret LICENSE_KEY (fallback)
+        uses: peter-evans/create-or-update-secret@v2
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          secret-name: LICENSE_KEY
+          secret-value: ${{ steps.sign.outputs.token }}
+

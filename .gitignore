@@ -9,4 +9,5 @@ coverage/
 dist/
 build/
 web/node_modules/
-
+keys/
+*.pem

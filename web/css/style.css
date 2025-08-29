@@ -1743,3 +1743,28 @@ input, textarea {
 }
 
 .job-actions { margin-top: 8px; }
+
+/* Toasts */
+.toast-container {
+  position: fixed;
+  top: 16px;
+  right: 16px;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.toast {
+  min-width: 240px;
+  max-width: 420px;
+  padding: 10px 12px;
+  border-radius: 6px;
+  color: #fff;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+  animation: slideIn 200ms ease-out;
+}
+.toast.error { background: #d32f2f; }
+.toast.success { background: #2e7d32; }
+.toast.info { background: #1976d2; }
+.toast .toast-close { float: right; cursor: pointer; margin-left: 8px; }
+@keyframes slideIn { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: translateY(0); } }

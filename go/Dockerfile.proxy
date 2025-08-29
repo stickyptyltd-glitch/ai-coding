@@ -1,0 +1,12 @@
+FROM golang:1.21-alpine AS build
+WORKDIR /src
+COPY . .
+RUN cd cmd/agentproxy && CGO_ENABLED=0 go build -o /out/agentproxy
+
+FROM alpine:3.20
+ENV AGENT_URL=http://app:3000
+COPY --from=build /out/agentproxy /usr/local/bin/agentproxy
+EXPOSE 8080
+HEALTHCHECK --interval=10s --timeout=2s CMD wget -qO- http://localhost:8080/healthz || exit 1
+ENTRYPOINT ["/usr/local/bin/agentproxy"]
+

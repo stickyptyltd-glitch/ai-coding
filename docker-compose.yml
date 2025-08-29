@@ -1,0 +1,49 @@
+version: '3.9'
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: ai-coding-agent:latest
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+      - AGENT_API_KEY=${AGENT_API_KEY:-}
+    ports:
+      - "3000:3000"
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:3000/healthz"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+      start_period: 10s
+    volumes:
+      - ./data:/app/data
+
+  proxy:
+    build:
+      context: ./go
+      dockerfile: Dockerfile.proxy
+    image: ai-agent-proxy:latest
+    environment:
+      - AGENT_URL=http://app:3000
+      - AGENT_API_KEY=${AGENT_API_KEY:-}
+      - PROXY_ADDR=:8080
+    depends_on:
+      app:
+        condition: service_healthy
+    ports:
+      - "8080:8080"
+  redis:
+    image: redis:7-alpine
+    profiles: ["extras"]
+    ports:
+      - "6379:6379"
+  postgres:
+    image: postgres:16-alpine
+    profiles: ["extras"]
+    environment:
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=agent
+    ports:
+      - "5432:5432"

@@ -463,6 +463,7 @@ class FilesManager {
                     <h2>Edit File: ${path}</h2>
                 </div>
                 <div class="form-group">
+                    <div id="monaco-container" style="height:60vh;display:none;border:1px solid #e0e0e0"></div>
                     <textarea id="file-edit-text" rows="18" class="code-textarea">${this.escapeHtml(content || '')}</textarea>
                 </div>
                 <div class="modal-actions">
@@ -473,6 +474,28 @@ class FilesManager {
             </div>
         `;
         this.app.showModal(modalContent);
+        // Try Monaco
+        if (window.require) {
+            window.require(['vs/editor/editor.main'], () => {
+                const container = document.getElementById('monaco-container');
+                const ta = document.getElementById('file-edit-text');
+                container.style.display = 'block';
+                ta.style.display = 'none';
+                const editor = monaco.editor.create(container, {
+                    value: content || '',
+                    language: this.detectLanguage(path),
+                    automaticLayout: true,
+                    minimap: { enabled: false }
+                });
+                // Save reads from editor if present
+                const saveBtn = document.getElementById('btn-save-file');
+                if (saveBtn) {
+                    saveBtn.addEventListener('click', () => {
+                        document.getElementById('file-edit-text').value = editor.getValue();
+                    }, { once: true });
+                }
+            });
+        }
         const saveBtn = document.getElementById('btn-save-file');
         if (saveBtn) {
             saveBtn.addEventListener('click', async () => {

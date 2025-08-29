@@ -1,0 +1,118 @@
+openapi: 3.0.3
+info:
+  title: AI Coding Agent API
+  version: 0.1.0
+servers:
+  - url: http://localhost:3000
+paths:
+  /healthz:
+    get:
+      summary: Healthcheck
+      responses:
+        '200': { description: OK }
+  /api/platform:
+    get:
+      summary: Platform status
+      responses: { '200': { description: OK } }
+  /api/platform/init:
+    post:
+      summary: Initialize platform
+      responses: { '200': { description: OK } }
+  /api/file:
+    get:
+      summary: Read file
+      parameters:
+        - in: query
+          name: path
+          schema: { type: string }
+          required: true
+      responses: { '200': { description: OK } }
+    post:
+      summary: Write file
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                path: { type: string }
+                content: { type: string }
+              required: [path]
+      responses: { '200': { description: OK } }
+  /api/file/delete:
+    post:
+      summary: Delete file
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                path: { type: string }
+              required: [path]
+      responses: { '200': { description: OK } }
+  /api/file/move:
+    post:
+      summary: Move/Rename file
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                from: { type: string }
+                to: { type: string }
+              required: [from, to]
+      responses: { '200': { description: OK } }
+  /api/chains/{id}/execute:
+    post:
+      summary: Execute chain (optionally as job)
+      parameters:
+        - in: path
+          name: id
+          schema: { type: string }
+          required: true
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                variables: { type: object }
+                asJob: { type: boolean }
+      responses: { '200': { description: OK } }
+  /api/jobs:
+    get:
+      summary: List jobs
+      responses: { '200': { description: OK } }
+  /api/jobs/{id}:
+    get:
+      summary: Get job
+      parameters:
+        - in: path
+          name: id
+          schema: { type: string }
+          required: true
+      responses: { '200': { description: OK } }
+  /api/jobs/{id}/cancel:
+    post:
+      summary: Cancel job
+      parameters:
+        - in: path
+          name: id
+          schema: { type: string }
+          required: true
+      responses: { '200': { description: OK } }
+  /api/jobs/{id}/retry:
+    post:
+      summary: Retry job
+      parameters:
+        - in: path
+          name: id
+          schema: { type: string }
+          required: true
+      responses: { '200': { description: OK } }
+

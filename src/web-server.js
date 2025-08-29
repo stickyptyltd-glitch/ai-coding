@@ -7,6 +7,14 @@ import { fileURLToPath } from 'url';
 import { CodingAgent } from './agent.js';
 import { ToolChainManager } from './tool-chains.js';
 // MemoryManager is managed via agent to centralize init
+import { applySecurity } from './security.js';
+import { Schemas, validateWithSchema } from './validation.js';
+import { installMetrics } from './metrics.js';
+import { installLogger } from './logger.js';
+import { installAuth, requireRole } from './auth.js';
+import { installPolicy } from './policy.js';
+import { ensureLicenseOrExit } from './license.js';
+import { enforceAntiTamper } from './anti-tamper.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -14,6 +22,9 @@ const __dirname = path.dirname(__filename);
 
 class WebServer {
   constructor(port = 3000) {
+    // Security gates
+    ensureLicenseOrExit();
+    enforceAntiTamper();
     this.port = port;
     this.app = express();
     this.server = createServer(this.app);
@@ -46,12 +57,20 @@ class WebServer {
   }
 
   setupMiddleware() {
+    installLogger(this.app);
     this.app.use(cors());
     this.app.use(express.json({ limit: '10mb' }));
     this.app.use(express.urlencoded({ extended: true }));
+    // Security hardening if modules available
+    applySecurity(this.app).catch(() => {});
+    installMetrics(this.app).catch(() => {});
+    installAuth(this.app).catch(() => {});
+    installPolicy(this.app);
     
     // Serve static files
     this.app.use(express.static(path.join(__dirname, '../web')));
+    // Serve docs (markdown/plain) under /docs
+    this.app.use('/docs', express.static(path.join(__dirname, '../docs')));
     
     // Request logging
     this.app.use((req, res, next) => {
@@ -75,6 +94,8 @@ class WebServer {
     // Agent operations
     this.app.post('/api/agent/analyze', async (req, res) => {
       try {
+        const { ok, errors } = validateWithSchema(Schemas.analyze, req.body || {});
+        if (!ok) return res.status(400).json({ error: errors.join('; ') });
         const { target } = req.body;
         const result = await this.agent.analyzeCode(target);
         res.json(result);
@@ -85,6 +106,8 @@ class WebServer {
 
     this.app.post('/api/agent/modify', async (req, res) => {
       try {
+        const { ok, errors } = validateWithSchema(Schemas.modify, req.body || {});
+        if (!ok) return res.status(400).json({ error: errors.join('; ') });
         const { target, instructions } = req.body;
         const result = await this.agent.modifyCode(target, instructions);
         res.json(result);
@@ -1639,8 +1662,10 @@ class WebServer {
       }
     });
 
-    this.app.post('/api/file', async (req, res) => {
+    this.app.post('/api/file', requireRole('editor','admin'), async (req, res) => {
       try {
+        const { ok, errors } = validateWithSchema(Schemas.fileCreate, req.body || {});
+        if (!ok) return res.status(400).json({ error: errors.join('; ') });
         const { path: filePath, content } = req.body;
         if (!filePath) return res.status(400).json({ error: 'path is required' });
         this.resolveSafe(filePath);
@@ -1651,8 +1676,10 @@ class WebServer {
       }
     });
 
-    this.app.post('/api/file/delete', async (req, res) => {
+    this.app.post('/api/file/delete', requireRole('editor','admin'), async (req, res) => {
       try {
+        const { ok, errors } = validateWithSchema(Schemas.fileDelete, req.body || {});
+        if (!ok) return res.status(400).json({ error: errors.join('; ') });
         const { path: filePath } = req.body;
         if (!filePath) return res.status(400).json({ error: 'path is required' });
         this.resolveSafe(filePath);
@@ -1663,8 +1690,10 @@ class WebServer {
       }
     });
 
-    this.app.post('/api/file/move', async (req, res) => {
+    this.app.post('/api/file/move', requireRole('editor','admin'), async (req, res) => {
       try {
+        const { ok, errors } = validateWithSchema(Schemas.fileMove, req.body || {});
+        if (!ok) return res.status(400).json({ error: errors.join('; ') });
         const { from, to } = req.body;
         if (!from || !to) return res.status(400).json({ error: 'from and to are required' });
         this.resolveSafe(from); this.resolveSafe(to);

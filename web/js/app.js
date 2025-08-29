@@ -570,6 +570,19 @@ class AIAgentApp {
         `;
         
         this.showModal(helpHTML);
+        const themeSel = document.getElementById('theme-select');
+        themeSel.value = localStorage.getItem('theme') || 'light';
+        themeSel.addEventListener('change', async (e) => {
+            const theme = e.target.value;
+            document.documentElement.setAttribute('data-theme', theme);
+            localStorage.setItem('theme', theme);
+            try {
+                await fetch('/api/preferences', {
+                    method: 'POST', headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ key: 'theme', value: theme })
+                });
+            } catch {}
+        });
     }
 
     showToolModal(tool) {
@@ -579,9 +592,18 @@ class AIAgentApp {
     }
 
     showError(message) {
-        // Simple error display - could be enhanced with a proper notification system
         console.error(message);
-        alert(message);
+        this.showToast('error', message);
+    }
+
+    showToast(type, message, timeout = 4000) {
+        const container = document.getElementById('toast-container');
+        if (!container) { alert(message); return; }
+        const el = document.createElement('div');
+        el.className = `toast ${type}`;
+        el.innerHTML = `<span class="toast-close" onclick="this.parentElement.remove()">×</span>${this.escapeHtml(message)}`;
+        container.appendChild(el);
+        setTimeout(() => el.remove(), timeout);
     }
 
     handleChatResponse(data) {

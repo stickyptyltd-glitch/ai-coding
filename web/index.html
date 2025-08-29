@@ -17,6 +17,9 @@
                     <span class="logo-text">AI Coding Agent</span>
                 </div>
                 <div class="header-controls">
+                    <a href="/docs/README.md" class="icon-btn" title="Docs" style="text-decoration:none; display:inline-flex; align-items:center;">
+                        📖
+                    </a>
                     <button id="settings-btn" class="icon-btn" title="Settings">⚙️</button>
                     <button id="help-btn" class="icon-btn" title="Help">❓</button>
                     <div class="status-indicator">
@@ -525,6 +528,9 @@
         <p>Processing...</p>
     </div>
 
+    <!-- Toast Notifications -->
+    <div id="toast-container" class="toast-container"></div>
+
     <!-- Scripts -->
     <script src="/socket.io/socket.io.js"></script>
     <!-- Prism for syntax highlighting (from CDN) -->
@@ -545,5 +551,12 @@
     <script src="/js/files.js"></script>
     <script src="/js/builder.js"></script>
     <script src="/js/jobs.js"></script>
+    <!-- Monaco editor (optional) -->
+    <script src="https://cdn.jsdelivr.net/npm/monaco-editor@0.45.0/min/vs/loader.js"></script>
+    <script>
+      if (window.require) {
+        window.require.config({ paths: { 'vs': 'https://cdn.jsdelivr.net/npm/monaco-editor@0.45.0/min/vs' } });
+      }
+    </script>
 </body>
 </html>
