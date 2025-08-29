@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.2.1] - 2025-08-30
+
+- Activation: RSA/HMAC license verification enforced in CLI and web server via `LICENSE_REQUIRED`, `LICENSE_KEY`, and public key/secret.
+- Anti‑Tamper: Manifest generation and startup verification (`MANIFEST.json`), configurable strict mode.
+- Tooling: Scripts to generate keys, sign/rotate tokens, and build tamper manifest.
+- Automation: GitHub Actions workflow to rotate `LICENSE_KEY` on schedule or manual dispatch.
+- Docs: Contributor guide (`AGENTS.md`), Licensing, Walkthrough, Marketing pack, docs index, and ADR 0001.
+- UI: Added in-app Docs link and served `/docs` statically.
+
 ## [1.2.0] - 2025-08-29
 
 - Web UI: Add full file editor (edit/save), create/delete/rename, and open-in-editor.
