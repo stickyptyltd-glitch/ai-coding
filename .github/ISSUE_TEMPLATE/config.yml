@@ -1,6 +1,5 @@
 blank_issues_enabled: false
 contact_links:
   - name: Questions / Support
-    url: https://github.com/your-org/your-repo/discussions
+    url: https://github.com/stickyptyltd-glitch/ai-coding-agent/discussions
     about: Ask questions and get help in Discussions.
-

@@ -2,10 +2,9 @@
 # Update the GitHub handles below to your team or maintainers.
 
 # Global default owners
-* @your-github-username
+* @dayle @stickyptyltd-glitch
 
 # Paths (override as needed)
-src/** @your-github-username
-web/** @your-github-username
-.github/** @your-github-username
-
+src/** @dayle @stickyptyltd-glitch
+web/** @dayle @stickyptyltd-glitch
+.github/** @dayle @stickyptyltd-glitch
