@@ -109,6 +109,7 @@ For activation and anti‑tamper, see docs/LICENSING.md. Quick start:
 
 - Start here: [docs/README.md](docs/README.md)
 - Key decision: [ADR 0001 – License Activation & Anti‑Tamper](docs/adr/0001-adopt-license-activation-and-anti-tamper.md)
+ - Operations Runbook: [docs/RUNBOOK.md](docs/RUNBOOK.md)
 
 ## ⚙️ Automation Status
 

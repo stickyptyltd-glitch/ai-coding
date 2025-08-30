@@ -1,0 +1,67 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ai-coding-agent
+  namespace: ai-agent-staging
+  labels:
+    app: ai-coding-agent
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ai-coding-agent
+  template:
+    metadata:
+      labels:
+        app: ai-coding-agent
+    spec:
+      containers:
+        - name: agent
+          image: your-registry/ai-coding-agent:1.2.1
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: 3000
+          env:
+            - name: NODE_ENV
+              value: "production"
+            - name: PORT
+              value: "3000"
+            - name: LICENSE_REQUIRED
+              value: "true"
+            - name: TAMPER_CHECK
+              value: "true"
+            - name: METRICS_REFRESH_MS
+              value: "15000"
+            - name: LICENSE_PUBLIC_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: agent-licensing
+                  key: public.pem
+            - name: LICENSE_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: agent-licensing
+                  key: license.key
+          readinessProbe:
+            httpGet:
+              path: /healthz/strict
+              port: http
+            initialDelaySeconds: 10
+            periodSeconds: 15
+            failureThreshold: 2
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: http
+            initialDelaySeconds: 20
+            periodSeconds: 30
+            failureThreshold: 3
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
+

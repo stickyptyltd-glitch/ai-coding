@@ -1,0 +1,36 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: ai-coding-agent-alerts
+  namespace: ai-agent-staging
+  labels:
+    app: ai-coding-agent
+spec:
+  groups:
+    - name: ai-coding-agent.rules
+      rules:
+        - alert: AgentLicenseInvalid
+          expr: agent_license_valid == 0
+          for: 2m
+          labels:
+            severity: warning
+          annotations:
+            summary: Agent license invalid
+            description: Activation failed or expired. Check LICENSE_* env and rotation workflow.
+        - alert: AgentTamperFailed
+          expr: agent_tamper_ok == 0
+          for: 2m
+          labels:
+            severity: critical
+          annotations:
+            summary: Anti-tamper check failing
+            description: Manifest mismatch detected. Verify integrity or regenerate MANIFEST.json after authorized change.
+        - alert: AgentUnhealthyStrict
+          expr: agent_health_strict_ok == 0
+          for: 2m
+          labels:
+            severity: critical
+          annotations:
+            summary: Strict health not OK
+            description: Readiness failing due to activation or tamper. See /api/status/license for details.
+

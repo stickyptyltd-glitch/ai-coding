@@ -13,8 +13,8 @@ import { installMetrics } from './metrics.js';
 import { installLogger } from './logger.js';
 import { installAuth, requireRole } from './auth.js';
 import { installPolicy } from './policy.js';
-import { ensureLicenseOrExit } from './license.js';
-import { enforceAntiTamper } from './anti-tamper.js';
+import { ensureLicenseOrExit, validateLicenseEnv } from './license.js';
+import { enforceAntiTamper, verifyManifest } from './anti-tamper.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -711,9 +711,65 @@ class WebServer {
       }
     });
 
+    // License and anti-tamper status
+    this.app.get('/api/status/license', (req, res) => {
+      try {
+        const required = String(process.env.LICENSE_REQUIRED || '').toLowerCase() === 'true';
+        const license = validateLicenseEnv();
+        const tamperEnabled = String(process.env.TAMPER_CHECK || '').toLowerCase() === 'true';
+        const tamperStrict = String(process.env.TAMPER_STRICT || '').toLowerCase() === 'true';
+        const tamper = tamperEnabled ? verifyManifest() : { ok: true, reason: 'Tamper check disabled' };
+
+        res.json({
+          license: {
+            required,
+            valid: license.valid,
+            method: license.method,
+            reason: license.reason,
+            claims: license.claims
+          },
+          tamper: {
+            enabled: tamperEnabled,
+            strict: tamperStrict,
+            ok: tamper.ok,
+            errors: tamper.errors
+          },
+          timestamp: new Date().toISOString()
+        });
+      } catch (error) {
+        res.status(500).json({ error: error.message });
+      }
+    });
+
     // Health endpoint
     this.app.get('/healthz', (req, res) => {
       res.json({ status: 'ok', uptime: process.uptime() });
+    });
+
+    // Strict health: includes license and anti-tamper checks
+    this.app.get('/healthz/strict', (req, res) => {
+      try {
+        const required = String(process.env.LICENSE_REQUIRED || '').toLowerCase() === 'true';
+        const license = validateLicenseEnv();
+        const tamperEnabled = String(process.env.TAMPER_CHECK || '').toLowerCase() === 'true';
+        const tamperStrict = String(process.env.TAMPER_STRICT || '').toLowerCase() === 'true';
+        const tamper = tamperEnabled ? verifyManifest() : { ok: true, reason: 'Tamper check disabled' };
+
+        const licenseOk = !required || license.valid === true;
+        const tamperOk = !tamperEnabled || tamper.ok === true;
+
+        const healthy = licenseOk && tamperOk;
+        const payload = {
+          status: healthy ? 'ok' : 'unhealthy',
+          license: { required, valid: license.valid, reason: license.reason },
+          tamper: { enabled: tamperEnabled, strict: tamperStrict, ok: tamper.ok, errors: tamper.errors },
+          uptime: process.uptime()
+        };
+        if (!healthy) return res.status(503).json(payload);
+        return res.json(payload);
+      } catch (error) {
+        return res.status(500).json({ status: 'error', error: error.message });
+      }
     });
 
     // Serve main app
