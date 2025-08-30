@@ -23,9 +23,13 @@ export class CodingAgent {
       model: 'gpt-4',
       maxTokens: 4000,
       temperature: 0.1,
+      enableAdvancedFeatures: true,
+      enableErrorRecovery: true,
+      enableContextualLearning: true,
+      maxRetries: 3,
       ...config
     };
-    
+
     this.filesystem = new FileSystem();
     this.aiProvider = new AIProvider(this.config);
     this.commandParser = new CommandParser();
@@ -44,60 +48,235 @@ export class CodingAgent {
     this.enterpriseAgent = new EnterpriseCodeAgent(this.aiProvider, this.config);
     this.context = new Map();
     this.initialized = false;
+
+    // Enhanced capabilities
+    this.sessionHistory = [];
+    this.performanceMetrics = new Map();
+    this.learningData = [];
+    this.activeProjects = new Map();
+    this.codebaseKnowledge = new Map();
+    this.errorPatterns = new Map();
+    this.successPatterns = new Map();
+
+    // Initialize performance tracking
+    this.startTime = Date.now();
+    this.operationCount = 0;
+    this.errorCount = 0;
+    this.successCount = 0;
   }
 
   async initialize() {
     try {
       if (this.initialized) return { success: true, alreadyInitialized: true };
-      // Initialize persistent systems
+
+      console.log(chalk.blue('🚀 Initializing AI Coding Agent...'));
+
+      // Validate configuration
+      const configValidation = this.validateConfiguration();
+      if (!configValidation.valid) {
+        throw new Error(`Configuration validation failed: ${configValidation.errors.join(', ')}`);
+      }
+
+      // Initialize core systems with error handling
+      const initResults = [];
+
+      // Initialize AI Provider
+      try {
+        await this.aiProvider.initialize();
+        initResults.push({ component: 'AIProvider', status: 'success' });
+        console.log(chalk.green('✅ AI Provider initialized'));
+      } catch (error) {
+        initResults.push({ component: 'AIProvider', status: 'error', error: error.message });
+        console.log(chalk.red('❌ AI Provider initialization failed:', error.message));
+      }
+
+      // Initialize Memory Manager
       if (this.memoryManager && typeof this.memoryManager.initialize === 'function') {
-        await this.memoryManager.initialize();
+        try {
+          await this.memoryManager.initialize();
+          initResults.push({ component: 'MemoryManager', status: 'success' });
+          console.log(chalk.green('✅ Memory Manager initialized'));
+        } catch (error) {
+          initResults.push({ component: 'MemoryManager', status: 'error', error: error.message });
+          console.log(chalk.yellow('⚠️ Memory Manager initialization failed:', error.message));
+        }
       }
+
+      // Initialize Tool Chain Manager
       if (this.toolChainManager && typeof this.toolChainManager.initializeTemplates === 'function') {
-        this.toolChainManager.initializeTemplates();
+        try {
+          this.toolChainManager.initializeTemplates();
+          initResults.push({ component: 'ToolChainManager', status: 'success' });
+          console.log(chalk.green('✅ Tool Chain Manager initialized'));
+        } catch (error) {
+          initResults.push({ component: 'ToolChainManager', status: 'error', error: error.message });
+          console.log(chalk.yellow('⚠️ Tool Chain Manager initialization failed:', error.message));
+        }
       }
+
+      // Initialize Multi-Agent System
+      if (this.multiAgent && typeof this.multiAgent.initialize === 'function') {
+        try {
+          await this.multiAgent.initialize();
+          initResults.push({ component: 'MultiAgentSystem', status: 'success' });
+          console.log(chalk.green('✅ Multi-Agent System initialized'));
+        } catch (error) {
+          initResults.push({ component: 'MultiAgentSystem', status: 'error', error: error.message });
+          console.log(chalk.yellow('⚠️ Multi-Agent System initialization failed:', error.message));
+        }
+      }
+
+      // Initialize Enterprise Agent
+      if (this.enterpriseAgent && typeof this.enterpriseAgent.initialize === 'function') {
+        try {
+          await this.enterpriseAgent.initialize();
+          initResults.push({ component: 'EnterpriseAgent', status: 'success' });
+          console.log(chalk.green('✅ Enterprise Agent initialized'));
+        } catch (error) {
+          initResults.push({ component: 'EnterpriseAgent', status: 'error', error: error.message });
+          console.log(chalk.yellow('⚠️ Enterprise Agent initialization failed:', error.message));
+        }
+      }
+
+      // Check if critical components failed
+      const criticalFailures = initResults.filter(r =>
+        r.status === 'error' && ['AIProvider'].includes(r.component)
+      );
+
+      if (criticalFailures.length > 0) {
+        throw new Error(`Critical component initialization failed: ${criticalFailures.map(f => f.component).join(', ')}`);
+      }
+
       this.initialized = true;
-      return { success: true };
+      const successCount = initResults.filter(r => r.status === 'success').length;
+      const totalCount = initResults.length;
+
+      console.log(chalk.green(`🎉 Agent initialized successfully (${successCount}/${totalCount} components)`));
+
+      return {
+        success: true,
+        initResults,
+        componentsInitialized: successCount,
+        totalComponents: totalCount
+      };
+
     } catch (e) {
+      console.log(chalk.red('❌ Agent initialization failed:', e.message));
       return { success: false, error: e.message };
     }
   }
 
+  validateConfiguration() {
+    const errors = [];
+    const warnings = [];
+
+    // Check required configuration
+    if (!this.config.aiProvider) {
+      errors.push('AI provider not specified');
+    }
+
+    if (!this.config.model) {
+      warnings.push('AI model not specified, using default');
+    }
+
+    if (this.config.maxTokens && (this.config.maxTokens < 100 || this.config.maxTokens > 32000)) {
+      warnings.push('maxTokens should be between 100 and 32000');
+    }
+
+    if (this.config.temperature && (this.config.temperature < 0 || this.config.temperature > 2)) {
+      warnings.push('temperature should be between 0 and 2');
+    }
+
+    // Check environment variables for AI providers
+    if (this.config.aiProvider === 'openai' && !process.env.OPENAI_API_KEY) {
+      errors.push('OPENAI_API_KEY environment variable not set');
+    }
+
+    if (this.config.aiProvider === 'anthropic' && !process.env.ANTHROPIC_API_KEY) {
+      errors.push('ANTHROPIC_API_KEY environment variable not set');
+    }
+
+    return {
+      valid: errors.length === 0,
+      errors,
+      warnings
+    };
+  }
+
   async processCommand(input) {
+    const startTime = Date.now();
+    this.operationCount++;
+
     try {
+      // Ensure agent is initialized
+      if (!this.initialized) {
+        const initResult = await this.initialize();
+        if (!initResult.success) {
+          throw new Error(`Agent initialization failed: ${initResult.error}`);
+        }
+      }
+
+      // Parse and validate command
       const command = this.commandParser.parse(input);
-      
+      if (!command || !command.type) {
+        throw new Error('Invalid command format');
+      }
+
+      // Log command for session history
+      this.sessionHistory.push({
+        timestamp: new Date(),
+        input,
+        command,
+        startTime
+      });
+
+      // Execute command with enhanced error handling
+      let result;
       switch (command.type) {
         case 'analyze':
-          return await this.analyzeCode(command.target);
+          result = await this.executeWithRetry(() => this.analyzeCode(command.target));
+          break;
         case 'modify':
-          return await this.modifyCode(command.target, command.instructions);
+          result = await this.executeWithRetry(() => this.modifyCode(command.target, command.instructions));
+          break;
         case 'create':
-          return await this.createFile(command.target, command.instructions);
+          result = await this.executeWithRetry(() => this.createFile(command.target, command.instructions));
+          break;
         case 'search':
-          return await this.searchCode(command.query);
+          result = await this.executeWithRetry(() => this.searchCode(command.query));
+          break;
         case 'explain':
-          return await this.explainCode(command.target);
+          result = await this.executeWithRetry(() => this.explainCode(command.target));
+          break;
         case 'scrape':
-          return await this.scrapeUrl(command.url, command.outputFile);
+          result = await this.executeWithRetry(() => this.scrapeUrl(command.url, command.outputFile));
+          break;
         case 'extract':
-          return await this.extractFromUrl(command.selector, command.url, command.outputFile);
+          result = await this.executeWithRetry(() => this.extractFromUrl(command.selector, command.url, command.outputFile));
+          break;
         case 'crawl':
-          return await this.crawlWebsite(command.url, command.depth, command.outputFile);
+          result = await this.executeWithRetry(() => this.crawlWebsite(command.url, command.depth, command.outputFile));
+          break;
         case 'analyze-web':
-          return await this.analyzeWebContent(command.url);
+          result = await this.executeWithRetry(() => this.analyzeWebContent(command.url));
+          break;
         case 'chain':
-          return await this.executeToolChain(command.name, command.params);
+          result = await this.executeWithRetry(() => this.executeToolChain(command.name, command.params));
+          break;
         case 'create-chain':
-          return await this.createToolChain(command.name, command.steps);
+          result = await this.executeWithRetry(() => this.createToolChain(command.name, command.steps));
+          break;
         case 'list-chains':
-          return await this.listToolChains();
+          result = await this.executeWithRetry(() => this.listToolChains());
+          break;
         case 'remember':
-          return await this.saveToMemory(command.memoryType, command.content, command.tags);
+          result = await this.executeWithRetry(() => this.saveToMemory(command.memoryType, command.content, command.tags));
+          break;
         case 'recall':
-          return await this.searchMemory(command.query, command.memoryType);
+          result = await this.executeWithRetry(() => this.searchMemory(command.query, command.memoryType));
+          break;
         case 'heal':
-          return await this.healCode(command.target, command.maxRetries);
+          result = await this.executeWithRetry(() => this.healCode(command.target, command.maxRetries));
         case 'smart-search':
           return await this.smartSearch(command.query);
         case 'refactor':
@@ -206,20 +385,240 @@ export class CodingAgent {
           return await this.buildAnySoftware(command.description, command.requirements, command.constraints);
         
         default:
-          return await this.handleGeneralQuery(input);
+          result = await this.executeWithRetry(() => this.handleGeneralQuery(input));
+          break;
       }
+
+      // Record successful operation
+      const endTime = Date.now();
+      const duration = endTime - startTime;
+      this.successCount++;
+
+      // Update session history with result
+      const lastEntry = this.sessionHistory[this.sessionHistory.length - 1];
+      if (lastEntry) {
+        lastEntry.result = result;
+        lastEntry.duration = duration;
+        lastEntry.success = true;
+      }
+
+      // Update performance metrics
+      this.updatePerformanceMetrics(command.type, duration, true);
+
+      // Learn from successful patterns
+      if (this.config.enableContextualLearning) {
+        this.recordSuccessPattern(command, result, duration);
+      }
+
+      return result;
+
     } catch (error) {
+      this.errorCount++;
+      const endTime = Date.now();
+      const duration = endTime - startTime;
+
       console.error(chalk.red('Error processing command:'), error.message);
-      return { success: false, error: error.message };
+
+      // Update session history with error
+      const lastEntry = this.sessionHistory[this.sessionHistory.length - 1];
+      if (lastEntry) {
+        lastEntry.error = error.message;
+        lastEntry.duration = duration;
+        lastEntry.success = false;
+      }
+
+      // Update performance metrics
+      this.updatePerformanceMetrics(command?.type || 'unknown', duration, false);
+
+      // Learn from error patterns
+      if (this.config.enableContextualLearning) {
+        this.recordErrorPattern(command, error, duration);
+      }
+
+      // Attempt error recovery if enabled
+      if (this.config.enableErrorRecovery && this.isRecoverableError(error)) {
+        console.log(chalk.yellow('🔄 Attempting error recovery...'));
+        try {
+          const recoveryResult = await this.attemptErrorRecovery(error, input);
+          if (recoveryResult.success) {
+            console.log(chalk.green('✅ Error recovery successful'));
+            return recoveryResult;
+          }
+        } catch (recoveryError) {
+          console.log(chalk.red('❌ Error recovery failed:', recoveryError.message));
+        }
+      }
+
+      return {
+        success: false,
+        error: error.message,
+        errorType: error.constructor.name,
+        timestamp: new Date(),
+        duration
+      };
     }
+  }
+
+  // Enhanced utility methods for improved functionality
+  async executeWithRetry(operation, maxRetries = null) {
+    const retries = maxRetries || this.config.maxRetries || 3;
+    let lastError;
+
+    for (let attempt = 1; attempt <= retries; attempt++) {
+      try {
+        const result = await operation();
+        if (attempt > 1) {
+          console.log(chalk.green(`✅ Operation succeeded on attempt ${attempt}`));
+        }
+        return result;
+      } catch (error) {
+        lastError = error;
+        console.log(chalk.yellow(`⚠️ Attempt ${attempt} failed: ${error.message}`));
+
+        if (attempt < retries && this.isRetryableError(error)) {
+          const delay = Math.min(1000 * Math.pow(2, attempt - 1), 5000); // Exponential backoff
+          console.log(chalk.blue(`🔄 Retrying in ${delay}ms...`));
+          await new Promise(resolve => setTimeout(resolve, delay));
+        } else {
+          break;
+        }
+      }
+    }
+
+    throw lastError;
+  }
+
+  isRetryableError(error) {
+    const retryablePatterns = [
+      'network',
+      'timeout',
+      'rate limit',
+      'quota',
+      'temporary',
+      'connection',
+      'service unavailable',
+      'internal server error'
+    ];
+
+    const message = error.message.toLowerCase();
+    return retryablePatterns.some(pattern => message.includes(pattern));
+  }
+
+  isRecoverableError(error) {
+    const recoverablePatterns = [
+      'file not found',
+      'permission denied',
+      'syntax error',
+      'module not found',
+      'command not found'
+    ];
+
+    const message = error.message.toLowerCase();
+    return recoverablePatterns.some(pattern => message.includes(pattern));
+  }
+
+  async attemptErrorRecovery(error, originalInput) {
+    try {
+      // Use error healing system for recovery
+      if (this.errorHealer) {
+        const healingResult = await this.errorHealer.healError(error);
+        if (healingResult.canHeal) {
+          // Retry the original command after healing
+          return await this.processCommand(originalInput);
+        }
+      }
+
+      // Try alternative approaches based on error type
+      if (error.message.includes('file not found')) {
+        return await this.handleFileNotFoundRecovery(error, originalInput);
+      }
+
+      if (error.message.includes('permission denied')) {
+        return await this.handlePermissionRecovery(error, originalInput);
+      }
+
+      return { success: false, error: 'No recovery strategy available' };
+    } catch (recoveryError) {
+      return { success: false, error: `Recovery failed: ${recoveryError.message}` };
+    }
+  }
+
+  updatePerformanceMetrics(commandType, duration, success) {
+    const key = commandType || 'unknown';
+    const existing = this.performanceMetrics.get(key) || {
+      count: 0,
+      totalDuration: 0,
+      successCount: 0,
+      errorCount: 0,
+      averageDuration: 0
+    };
+
+    existing.count++;
+    existing.totalDuration += duration;
+    if (success) {
+      existing.successCount++;
+    } else {
+      existing.errorCount++;
+    }
+    existing.averageDuration = existing.totalDuration / existing.count;
+
+    this.performanceMetrics.set(key, existing);
+  }
+
+  recordSuccessPattern(command, result, duration) {
+    const pattern = {
+      commandType: command.type,
+      timestamp: new Date(),
+      duration,
+      resultSize: JSON.stringify(result).length,
+      context: this.extractContext(command)
+    };
+
+    this.successPatterns.set(`${command.type}_${Date.now()}`, pattern);
+
+    // Keep only recent patterns (last 100)
+    if (this.successPatterns.size > 100) {
+      const oldestKey = this.successPatterns.keys().next().value;
+      this.successPatterns.delete(oldestKey);
+    }
+  }
+
+  recordErrorPattern(command, error, duration) {
+    const pattern = {
+      commandType: command?.type || 'unknown',
+      errorType: error.constructor.name,
+      errorMessage: error.message,
+      timestamp: new Date(),
+      duration,
+      context: this.extractContext(command)
+    };
+
+    this.errorPatterns.set(`${command?.type || 'unknown'}_${Date.now()}`, pattern);
+
+    // Keep only recent patterns (last 100)
+    if (this.errorPatterns.size > 100) {
+      const oldestKey = this.errorPatterns.keys().next().value;
+      this.errorPatterns.delete(oldestKey);
+    }
+  }
+
+  extractContext(command) {
+    if (!command) return {};
+
+    return {
+      hasTarget: !!command.target,
+      hasInstructions: !!command.instructions,
+      hasOptions: !!command.options,
+      targetType: command.target ? (command.target.includes('.') ? 'file' : 'directory') : null
+    };
   }
 
   async analyzeCode(filePath) {
     const content = await this.filesystem.readFile(filePath);
     const analysis = await this.codeAnalyzer.analyze(content, filePath);
-    
+
     const prompt = `Analyze this code and provide insights:
-    
+
 File: ${filePath}
 Content:
 ${content}
@@ -237,7 +636,222 @@ Please provide:
       taskType: 'codeAnalysis',
       maxTokens: 3000
     });
-    
+
+    return {
+      success: true,
+      filePath,
+      analysis,
+      aiInsights: aiResponse,
+      timestamp: new Date(),
+      metrics: {
+        linesOfCode: analysis.metrics?.lines || 0,
+        complexity: analysis.metrics?.complexity || 0,
+        maintainabilityIndex: analysis.metrics?.maintainability || 0
+      }
+    };
+  }
+
+  async handleFileNotFoundRecovery(error, originalInput) {
+    console.log(chalk.blue('🔍 Attempting file not found recovery...'));
+
+    // Extract file path from error or original input
+    const filePathMatch = error.message.match(/['"`]([^'"`]+)['"`]/) ||
+                         originalInput.match(/\b[\w\-_./]+\.\w+\b/);
+
+    if (filePathMatch) {
+      const filePath = filePathMatch[1] || filePathMatch[0];
+
+      // Try to find similar files
+      const similarFiles = await this.findSimilarFiles(filePath);
+      if (similarFiles.length > 0) {
+        console.log(chalk.green(`Found similar files: ${similarFiles.join(', ')}`));
+        return {
+          success: true,
+          recovered: true,
+          suggestions: similarFiles,
+          message: `File not found, but found similar files: ${similarFiles.join(', ')}`
+        };
+      }
+
+      // Try to create the file if it's a reasonable request
+      if (originalInput.includes('create') || originalInput.includes('generate')) {
+        console.log(chalk.blue('🆕 Attempting to create missing file...'));
+        try {
+          const createResult = await this.createFile(filePath, '// Auto-generated file');
+          return {
+            success: true,
+            recovered: true,
+            created: filePath,
+            message: `Created missing file: ${filePath}`
+          };
+        } catch (createError) {
+          console.log(chalk.red('Failed to create file:', createError.message));
+        }
+      }
+    }
+
+    return { success: false, error: 'Could not recover from file not found error' };
+  }
+
+  async handlePermissionRecovery(error, originalInput) {
+    console.log(chalk.blue('🔐 Attempting permission recovery...'));
+
+    // Suggest alternative approaches for permission issues
+    return {
+      success: true,
+      recovered: true,
+      suggestions: [
+        'Try running with elevated permissions',
+        'Check file/directory ownership',
+        'Verify read/write permissions',
+        'Use a different file location'
+      ],
+      message: 'Permission denied - provided recovery suggestions'
+    };
+  }
+
+  async findSimilarFiles(targetPath) {
+    try {
+      const fs = await import('fs/promises');
+      const path = await import('path');
+
+      const dir = path.dirname(targetPath);
+      const basename = path.basename(targetPath, path.extname(targetPath));
+      const ext = path.extname(targetPath);
+
+      const files = await fs.readdir(dir).catch(() => []);
+
+      return files.filter(file => {
+        const fileBasename = path.basename(file, path.extname(file));
+        const fileExt = path.extname(file);
+
+        // Check for similar names or same extension
+        return (
+          fileBasename.toLowerCase().includes(basename.toLowerCase()) ||
+          basename.toLowerCase().includes(fileBasename.toLowerCase()) ||
+          (fileExt === ext && fileBasename.length > 0)
+        );
+      }).slice(0, 5); // Limit to 5 suggestions
+
+    } catch (error) {
+      console.log(chalk.yellow('Could not search for similar files:', error.message));
+      return [];
+    }
+  }
+
+  // Enhanced performance monitoring methods
+  getPerformanceReport() {
+    const uptime = Date.now() - this.startTime;
+    const totalOperations = this.operationCount;
+    const successRate = totalOperations > 0 ? (this.successCount / totalOperations) * 100 : 0;
+
+    const commandMetrics = Array.from(this.performanceMetrics.entries()).map(([command, metrics]) => ({
+      command,
+      ...metrics,
+      successRate: metrics.count > 0 ? (metrics.successCount / metrics.count) * 100 : 0
+    }));
+
+    return {
+      uptime: Math.round(uptime / 1000), // seconds
+      totalOperations,
+      successCount: this.successCount,
+      errorCount: this.errorCount,
+      successRate: Math.round(successRate * 100) / 100,
+      averageResponseTime: commandMetrics.length > 0
+        ? Math.round(commandMetrics.reduce((sum, m) => sum + m.averageDuration, 0) / commandMetrics.length)
+        : 0,
+      commandMetrics: commandMetrics.sort((a, b) => b.count - a.count),
+      memoryUsage: process.memoryUsage(),
+      sessionHistorySize: this.sessionHistory.length
+    };
+  }
+
+  // Enhanced learning capabilities
+  async learnFromInteraction(input, result, feedback = null) {
+    if (!this.config.enableContextualLearning) return;
+
+    const learningEntry = {
+      timestamp: new Date(),
+      input,
+      result,
+      feedback,
+      success: result.success,
+      context: {
+        sessionLength: this.sessionHistory.length,
+        recentErrors: this.errorCount,
+        performanceMetrics: this.getPerformanceReport()
+      }
+    };
+
+    this.learningData.push(learningEntry);
+
+    // Keep only recent learning data (last 1000 entries)
+    if (this.learningData.length > 1000) {
+      this.learningData = this.learningData.slice(-1000);
+    }
+
+    // Analyze patterns and adjust behavior
+    await this.analyzeAndAdaptBehavior();
+  }
+
+  async analyzeAndAdaptBehavior() {
+    try {
+      // Analyze recent patterns
+      const recentData = this.learningData.slice(-50); // Last 50 interactions
+      const successfulPatterns = recentData.filter(entry => entry.success);
+      const failedPatterns = recentData.filter(entry => !entry.success);
+
+      // Adjust configuration based on patterns
+      if (failedPatterns.length > successfulPatterns.length) {
+        // Increase retry attempts if seeing more failures
+        this.config.maxRetries = Math.min(this.config.maxRetries + 1, 5);
+        console.log(chalk.yellow(`📈 Increased max retries to ${this.config.maxRetries} due to recent failures`));
+      } else if (successfulPatterns.length > failedPatterns.length * 3) {
+        // Decrease retry attempts if seeing consistent success
+        this.config.maxRetries = Math.max(this.config.maxRetries - 1, 1);
+        console.log(chalk.green(`📉 Decreased max retries to ${this.config.maxRetries} due to consistent success`));
+      }
+
+      // Store insights for future use
+      await this.storeAdaptationInsights(successfulPatterns, failedPatterns);
+
+    } catch (error) {
+      console.log(chalk.yellow('Learning analysis failed:', error.message));
+    }
+  }
+
+  async storeAdaptationInsights(successfulPatterns, failedPatterns) {
+    const insights = {
+      timestamp: new Date(),
+      successPatterns: successfulPatterns.length,
+      failurePatterns: failedPatterns.length,
+      commonSuccessCommands: this.extractCommonCommands(successfulPatterns),
+      commonFailureCommands: this.extractCommonCommands(failedPatterns),
+      adaptations: {
+        maxRetries: this.config.maxRetries,
+        temperature: this.config.temperature
+      }
+    };
+
+    // Store in memory manager if available
+    if (this.memoryManager && typeof this.memoryManager.store === 'function') {
+      await this.memoryManager.store('adaptation_insights', insights, ['learning', 'performance']);
+    }
+  }
+
+  extractCommonCommands(patterns) {
+    const commandCounts = {};
+    patterns.forEach(pattern => {
+      const command = pattern.input.split(' ')[0];
+      commandCounts[command] = (commandCounts[command] || 0) + 1;
+    });
+
+    return Object.entries(commandCounts)
+      .sort(([,a], [,b]) => b - a)
+      .slice(0, 5)
+      .map(([command, count]) => ({ command, count }));
+  }
+
     return {
       success: true,
       analysis,

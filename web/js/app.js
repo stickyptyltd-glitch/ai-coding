@@ -1,4 +1,4 @@
-// Main Application Class
+// Enhanced Main Application Class
 class AIAgentApp {
     constructor() {
         this.socket = null;
@@ -6,51 +6,208 @@ class AIAgentApp {
         this.currentConversation = null;
         this.memoryEnabled = true;
         this.isLoading = false;
-        
+
+        // Enhanced features
+        this.collaborationMode = false;
+        this.activeUsers = new Map();
+        this.realtimeUpdates = true;
+        this.notifications = [];
+        this.workspaceState = new Map();
+        this.autoSave = true;
+        this.theme = localStorage.getItem('theme') || 'light';
+        this.preferences = this.loadPreferences();
+        this.performanceMetrics = {
+            responseTime: [],
+            errorCount: 0,
+            successCount: 0
+        };
+
+        // Real-time collaboration features
+        this.cursors = new Map();
+        this.selections = new Map();
+        this.liveEditing = false;
+        this.conflictResolution = new ConflictResolver();
+
         this.init();
     }
 
     init() {
+        this.applyTheme();
         this.setupSocket();
         this.setupEventListeners();
         this.setupViewSwitching();
+        this.setupRealtimeFeatures();
+        this.setupNotificationSystem();
+        this.setupPerformanceMonitoring();
         this.loadInitialData();
+        this.initializeWorkspace();
+
+        // Initialize enhanced features
+        this.setupKeyboardShortcuts();
+        this.setupAutoSave();
+        this.setupCollaborationFeatures();
+
+        console.log('🚀 Enhanced AI Agent App initialized');
+    }
+
+    loadPreferences() {
+        const defaultPreferences = {
+            autoSave: true,
+            notifications: true,
+            soundEffects: false,
+            compactMode: false,
+            showLineNumbers: true,
+            wordWrap: true,
+            fontSize: 14,
+            tabSize: 2,
+            theme: 'light',
+            language: 'en'
+        };
+
+        try {
+            const saved = localStorage.getItem('aiagent_preferences');
+            return saved ? { ...defaultPreferences, ...JSON.parse(saved) } : defaultPreferences;
+        } catch (error) {
+            console.warn('Failed to load preferences:', error);
+            return defaultPreferences;
+        }
+    }
+
+    savePreferences() {
+        try {
+            localStorage.setItem('aiagent_preferences', JSON.stringify(this.preferences));
+        } catch (error) {
+            console.warn('Failed to save preferences:', error);
+        }
+    }
+
+    applyTheme() {
+        document.documentElement.setAttribute('data-theme', this.theme);
+        const themeToggle = document.getElementById('theme-toggle');
+        if (themeToggle) {
+            themeToggle.textContent = this.theme === 'dark' ? '☀️' : '🌙';
+        }
+    }
+
+    toggleTheme() {
+        this.theme = this.theme === 'light' ? 'dark' : 'light';
+        this.preferences.theme = this.theme;
+        localStorage.setItem('theme', this.theme);
+        this.applyTheme();
+        this.savePreferences();
+        this.showNotification(`Switched to ${this.theme} theme`, 'info');
     }
 
     setupSocket() {
-        this.socket = io();
-        
-        this.socket.on('connect', () => {
-            console.log('Connected to server');
-            this.updateConnectionStatus(true);
+        this.socket = io({
+            transports: ['websocket', 'polling'],
+            upgrade: true,
+            rememberUpgrade: true
         });
 
-        this.socket.on('disconnect', () => {
-            console.log('Disconnected from server');
+        this.socket.on('connect', () => {
+            console.log('🔌 Connected to server');
+            this.updateConnectionStatus(true);
+            this.showNotification('Connected to server', 'success');
+            this.joinCollaborationRoom();
+            this.syncWorkspaceState();
+        });
+
+        this.socket.on('disconnect', (reason) => {
+            console.log('❌ Disconnected from server:', reason);
             this.updateConnectionStatus(false);
+            this.showNotification('Disconnected from server', 'warning');
+            this.handleDisconnection(reason);
         });
 
         this.socket.on('connect_error', (error) => {
             console.error('Connection error:', error);
             this.updateConnectionStatus(false);
+            this.showNotification('Connection failed', 'error');
+            this.performanceMetrics.errorCount++;
         });
 
-        // Chat event listeners
+        this.socket.on('reconnect', (attemptNumber) => {
+            console.log('🔄 Reconnected after', attemptNumber, 'attempts');
+            this.showNotification('Reconnected successfully', 'success');
+            this.syncWorkspaceState();
+        });
+
+        // Enhanced chat event listeners
         this.socket.on('chat-response', (data) => {
             this.handleChatResponse(data);
+            this.trackPerformance('chat-response', data.responseTime);
         });
 
         this.socket.on('chat-error', (data) => {
             this.handleChatError(data);
+            this.performanceMetrics.errorCount++;
+        });
+
+        this.socket.on('chat-stream-chunk', (data) => {
+            this.handleStreamChunk(data);
         });
 
         // Tool chain event listeners
         this.socket.on('chain-started', (data) => {
             this.handleChainStarted(data);
+            this.showNotification(`Tool chain "${data.name}" started`, 'info');
         });
 
         this.socket.on('chain-completed', (data) => {
             this.handleChainCompleted(data);
+            this.showNotification(`Tool chain "${data.name}" completed`, 'success');
+        });
+
+        this.socket.on('chain-progress', (data) => {
+            this.handleChainProgress(data);
+        });
+
+        // Real-time collaboration events
+        this.socket.on('user-joined', (data) => {
+            this.handleUserJoined(data);
+        });
+
+        this.socket.on('user-left', (data) => {
+            this.handleUserLeft(data);
+        });
+
+        this.socket.on('cursor-update', (data) => {
+            this.handleCursorUpdate(data);
+        });
+
+        this.socket.on('selection-update', (data) => {
+            this.handleSelectionUpdate(data);
+        });
+
+        this.socket.on('workspace-update', (data) => {
+            this.handleWorkspaceUpdate(data);
+        });
+
+        this.socket.on('live-edit', (data) => {
+            this.handleLiveEdit(data);
+        });
+
+        // System events
+        this.socket.on('system-notification', (data) => {
+            this.showNotification(data.message, data.type || 'info');
+        });
+
+        this.socket.on('performance-metrics', (data) => {
+            this.updatePerformanceDisplay(data);
+        });
+
+        // File system events
+        this.socket.on('file-changed', (data) => {
+            this.handleFileChanged(data);
+        });
+
+        this.socket.on('files-listed', (data) => {
+            this.handleFilesListed(data);
+        });
+
+        this.socket.on('file-content', (data) => {
+            this.handleFileContent(data);
         });
 
         this.socket.on('chain-error', (data) => {
@@ -648,7 +805,706 @@ class AIAgentApp {
         div.textContent = text;
         return div.innerHTML;
     }
+
+    // Enhanced real-time collaboration methods
+    setupRealtimeFeatures() {
+        this.setupPresenceIndicators();
+        this.setupLiveEditing();
+        this.setupWorkspaceSync();
+        console.log('🔄 Real-time features initialized');
+    }
+
+    setupPresenceIndicators() {
+        // Create presence indicator container
+        const presenceContainer = document.createElement('div');
+        presenceContainer.id = 'presence-indicators';
+        presenceContainer.className = 'presence-indicators';
+
+        const header = document.querySelector('.app-header .header-content');
+        if (header) {
+            header.appendChild(presenceContainer);
+        }
+    }
+
+    setupLiveEditing() {
+        // Set up live editing for text areas and code editors
+        const textAreas = document.querySelectorAll('textarea, input[type="text"]');
+        textAreas.forEach(element => {
+            element.addEventListener('input', (e) => {
+                if (this.liveEditing && this.collaborationMode) {
+                    this.broadcastEdit(e.target.id, e.target.value, e.target.selectionStart);
+                }
+            });
+
+            element.addEventListener('selectionchange', (e) => {
+                if (this.collaborationMode) {
+                    this.broadcastSelection(e.target.id, e.target.selectionStart, e.target.selectionEnd);
+                }
+            });
+        });
+    }
+
+    setupWorkspaceSync() {
+        // Sync workspace state periodically
+        setInterval(() => {
+            if (this.socket && this.socket.connected) {
+                this.syncWorkspaceState();
+            }
+        }, 30000); // Every 30 seconds
+    }
+
+    setupNotificationSystem() {
+        // Create notification container if it doesn't exist
+        if (!document.getElementById('notification-container')) {
+            const container = document.createElement('div');
+            container.id = 'notification-container';
+            container.className = 'notification-container';
+            document.body.appendChild(container);
+        }
+    }
+
+    setupPerformanceMonitoring() {
+        // Monitor performance metrics
+        this.performanceInterval = setInterval(() => {
+            this.updatePerformanceMetrics();
+        }, 5000); // Every 5 seconds
+    }
+
+    setupKeyboardShortcuts() {
+        document.addEventListener('keydown', (e) => {
+            // Enhanced shortcuts
+            if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === 'P') {
+                e.preventDefault();
+                this.toggleCollaborationMode();
+                return;
+            }
+
+            if ((e.ctrlKey || e.metaKey) && e.key === ',') {
+                e.preventDefault();
+                this.showPreferences();
+                return;
+            }
+
+            if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === 'T') {
+                e.preventDefault();
+                this.toggleTheme();
+                return;
+            }
+
+            if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+                e.preventDefault();
+                this.saveWorkspace();
+                return;
+            }
+
+            if (e.key === 'F11') {
+                e.preventDefault();
+                this.toggleFullscreen();
+                return;
+            }
+        });
+    }
+
+    setupAutoSave() {
+        if (this.preferences.autoSave) {
+            this.autoSaveInterval = setInterval(() => {
+                this.autoSaveWorkspace();
+            }, 60000); // Every minute
+        }
+    }
+
+    setupCollaborationFeatures() {
+        // Add collaboration toggle button
+        const collaborationToggle = document.createElement('button');
+        collaborationToggle.id = 'collaboration-toggle';
+        collaborationToggle.className = 'icon-btn';
+        collaborationToggle.title = 'Toggle Collaboration Mode';
+        collaborationToggle.innerHTML = '👥';
+        collaborationToggle.addEventListener('click', () => this.toggleCollaborationMode());
+
+        const headerControls = document.querySelector('.header-controls');
+        if (headerControls) {
+            headerControls.appendChild(collaborationToggle);
+        }
+    }
+
+    // Real-time collaboration handlers
+    joinCollaborationRoom() {
+        if (this.socket && this.socket.connected) {
+            this.socket.emit('join-collaboration', {
+                userId: this.getUserId(),
+                userName: this.getUserName(),
+                workspace: this.getCurrentWorkspace()
+            });
+        }
+    }
+
+    toggleCollaborationMode() {
+        this.collaborationMode = !this.collaborationMode;
+        const toggle = document.getElementById('collaboration-toggle');
+        if (toggle) {
+            toggle.classList.toggle('active', this.collaborationMode);
+            toggle.title = this.collaborationMode ? 'Exit Collaboration Mode' : 'Enter Collaboration Mode';
+        }
+
+        this.showNotification(
+            `Collaboration mode ${this.collaborationMode ? 'enabled' : 'disabled'}`,
+            'info'
+        );
+
+        if (this.collaborationMode) {
+            this.joinCollaborationRoom();
+        } else {
+            this.leaveCollaborationRoom();
+        }
+    }
+
+    leaveCollaborationRoom() {
+        if (this.socket && this.socket.connected) {
+            this.socket.emit('leave-collaboration', {
+                userId: this.getUserId()
+            });
+        }
+    }
+
+    handleUserJoined(data) {
+        this.activeUsers.set(data.userId, data);
+        this.updatePresenceIndicators();
+        this.showNotification(`${data.userName} joined the session`, 'info');
+    }
+
+    handleUserLeft(data) {
+        this.activeUsers.delete(data.userId);
+        this.cursors.delete(data.userId);
+        this.selections.delete(data.userId);
+        this.updatePresenceIndicators();
+        this.showNotification(`${data.userName} left the session`, 'info');
+    }
+
+    updatePresenceIndicators() {
+        const container = document.getElementById('presence-indicators');
+        if (!container) return;
+
+        container.innerHTML = '';
+        this.activeUsers.forEach((user, userId) => {
+            const indicator = document.createElement('div');
+            indicator.className = 'presence-indicator';
+            indicator.title = user.userName;
+            indicator.style.backgroundColor = this.getUserColor(userId);
+            indicator.textContent = user.userName.charAt(0).toUpperCase();
+            container.appendChild(indicator);
+        });
+    }
+
+    getUserColor(userId) {
+        // Generate consistent color for user
+        const colors = ['#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEAA7', '#DDA0DD', '#98D8C8'];
+        const hash = userId.split('').reduce((a, b) => {
+            a = ((a << 5) - a) + b.charCodeAt(0);
+            return a & a;
+        }, 0);
+        return colors[Math.abs(hash) % colors.length];
+    }
+
+    // Enhanced notification system
+    showNotification(message, type = 'info', duration = 5000) {
+        const container = document.getElementById('notification-container') ||
+                         document.getElementById('toast-container');
+        if (!container) return;
+
+        const notification = document.createElement('div');
+        notification.className = `notification notification-${type}`;
+        notification.innerHTML = `
+            <div class="notification-content">
+                <span class="notification-icon">${this.getNotificationIcon(type)}</span>
+                <span class="notification-message">${message}</span>
+                <button class="notification-close" onclick="this.parentElement.parentElement.remove()">×</button>
+            </div>
+        `;
+
+        container.appendChild(notification);
+
+        // Auto-remove after duration
+        setTimeout(() => {
+            if (notification.parentElement) {
+                notification.remove();
+            }
+        }, duration);
+
+        // Add to notifications history
+        this.notifications.unshift({
+            message,
+            type,
+            timestamp: new Date(),
+            id: Date.now()
+        });
+
+        // Keep only last 50 notifications
+        if (this.notifications.length > 50) {
+            this.notifications = this.notifications.slice(0, 50);
+        }
+    }
+
+    getNotificationIcon(type) {
+        const icons = {
+            success: '✅',
+            error: '❌',
+            warning: '⚠️',
+            info: 'ℹ️'
+        };
+        return icons[type] || icons.info;
+    }
+
+    // Performance monitoring
+    trackPerformance(operation, responseTime) {
+        this.performanceMetrics.responseTime.push({
+            operation,
+            time: responseTime,
+            timestamp: Date.now()
+        });
+
+        // Keep only last 100 measurements
+        if (this.performanceMetrics.responseTime.length > 100) {
+            this.performanceMetrics.responseTime = this.performanceMetrics.responseTime.slice(-100);
+        }
+
+        this.performanceMetrics.successCount++;
+    }
+
+    updatePerformanceMetrics() {
+        const avgResponseTime = this.performanceMetrics.responseTime.length > 0
+            ? this.performanceMetrics.responseTime.reduce((sum, metric) => sum + metric.time, 0) / this.performanceMetrics.responseTime.length
+            : 0;
+
+        const successRate = this.performanceMetrics.successCount + this.performanceMetrics.errorCount > 0
+            ? (this.performanceMetrics.successCount / (this.performanceMetrics.successCount + this.performanceMetrics.errorCount)) * 100
+            : 100;
+
+        // Update performance display if exists
+        const perfDisplay = document.getElementById('performance-display');
+        if (perfDisplay) {
+            perfDisplay.innerHTML = `
+                <div class="perf-metric">
+                    <span class="perf-label">Avg Response:</span>
+                    <span class="perf-value">${avgResponseTime.toFixed(0)}ms</span>
+                </div>
+                <div class="perf-metric">
+                    <span class="perf-label">Success Rate:</span>
+                    <span class="perf-value">${successRate.toFixed(1)}%</span>
+                </div>
+            `;
+        }
+    }
+
+    // Workspace management
+    initializeWorkspace() {
+        this.workspaceState.set('currentProject', null);
+        this.workspaceState.set('openFiles', []);
+        this.workspaceState.set('recentFiles', []);
+        this.workspaceState.set('bookmarks', []);
+        this.loadWorkspaceFromStorage();
+    }
+
+    loadWorkspaceFromStorage() {
+        try {
+            const saved = localStorage.getItem('aiagent_workspace');
+            if (saved) {
+                const workspace = JSON.parse(saved);
+                Object.entries(workspace).forEach(([key, value]) => {
+                    this.workspaceState.set(key, value);
+                });
+            }
+        } catch (error) {
+            console.warn('Failed to load workspace:', error);
+        }
+    }
+
+    saveWorkspace() {
+        try {
+            const workspace = Object.fromEntries(this.workspaceState);
+            localStorage.setItem('aiagent_workspace', JSON.stringify(workspace));
+            this.showNotification('Workspace saved', 'success', 2000);
+        } catch (error) {
+            console.error('Failed to save workspace:', error);
+            this.showNotification('Failed to save workspace', 'error');
+        }
+    }
+
+    autoSaveWorkspace() {
+        if (this.preferences.autoSave) {
+            this.saveWorkspace();
+        }
+    }
+
+    syncWorkspaceState() {
+        if (this.socket && this.socket.connected) {
+            this.socket.emit('sync-workspace', {
+                userId: this.getUserId(),
+                state: Object.fromEntries(this.workspaceState)
+            });
+        }
+    }
+
+    handleWorkspaceUpdate(data) {
+        if (data.userId !== this.getUserId()) {
+            // Update from another user
+            Object.entries(data.state).forEach(([key, value]) => {
+                this.workspaceState.set(key, value);
+            });
+            this.showNotification(`Workspace updated by ${data.userName}`, 'info', 3000);
+        }
+    }
+
+    // Utility methods
+    getUserId() {
+        let userId = localStorage.getItem('aiagent_user_id');
+        if (!userId) {
+            userId = 'user_' + Math.random().toString(36).substr(2, 9);
+            localStorage.setItem('aiagent_user_id', userId);
+        }
+        return userId;
+    }
+
+    getUserName() {
+        return localStorage.getItem('aiagent_user_name') || 'Anonymous User';
+    }
+
+    getCurrentWorkspace() {
+        return this.workspaceState.get('currentProject') || 'default';
+    }
+
+    toggleFullscreen() {
+        if (!document.fullscreenElement) {
+            document.documentElement.requestFullscreen();
+            this.showNotification('Entered fullscreen mode', 'info', 2000);
+        } else {
+            document.exitFullscreen();
+            this.showNotification('Exited fullscreen mode', 'info', 2000);
+        }
+    }
+
+    showPreferences() {
+        const modal = document.getElementById('modal-content');
+        if (!modal) return;
+
+        modal.innerHTML = `
+            <div class="preferences-modal">
+                <h2>Preferences</h2>
+                <div class="preference-group">
+                    <h3>General</h3>
+                    <label class="preference-item">
+                        <input type="checkbox" ${this.preferences.autoSave ? 'checked' : ''}
+                               onchange="app.updatePreference('autoSave', this.checked)">
+                        Auto-save workspace
+                    </label>
+                    <label class="preference-item">
+                        <input type="checkbox" ${this.preferences.notifications ? 'checked' : ''}
+                               onchange="app.updatePreference('notifications', this.checked)">
+                        Show notifications
+                    </label>
+                    <label class="preference-item">
+                        <input type="checkbox" ${this.preferences.soundEffects ? 'checked' : ''}
+                               onchange="app.updatePreference('soundEffects', this.checked)">
+                        Sound effects
+                    </label>
+                </div>
+                <div class="preference-group">
+                    <h3>Editor</h3>
+                    <label class="preference-item">
+                        <span>Font size:</span>
+                        <input type="range" min="10" max="24" value="${this.preferences.fontSize}"
+                               onchange="app.updatePreference('fontSize', parseInt(this.value))">
+                        <span>${this.preferences.fontSize}px</span>
+                    </label>
+                    <label class="preference-item">
+                        <input type="checkbox" ${this.preferences.showLineNumbers ? 'checked' : ''}
+                               onchange="app.updatePreference('showLineNumbers', this.checked)">
+                        Show line numbers
+                    </label>
+                    <label class="preference-item">
+                        <input type="checkbox" ${this.preferences.wordWrap ? 'checked' : ''}
+                               onchange="app.updatePreference('wordWrap', this.checked)">
+                        Word wrap
+                    </label>
+                </div>
+                <div class="modal-actions">
+                    <button class="btn-secondary" onclick="app.hideModal()">Close</button>
+                    <button class="btn-primary" onclick="app.resetPreferences()">Reset to Defaults</button>
+                </div>
+            </div>
+        `;
+
+        this.showModal();
+    }
+
+    updatePreference(key, value) {
+        this.preferences[key] = value;
+        this.savePreferences();
+        this.applyPreferences();
+    }
+
+    applyPreferences() {
+        // Apply preferences to the UI
+        if (this.preferences.fontSize) {
+            document.documentElement.style.setProperty('--editor-font-size', this.preferences.fontSize + 'px');
+        }
+
+        // Update auto-save
+        if (this.autoSaveInterval) {
+            clearInterval(this.autoSaveInterval);
+        }
+        if (this.preferences.autoSave) {
+            this.setupAutoSave();
+        }
+    }
+
+    resetPreferences() {
+        this.preferences = this.loadPreferences();
+        localStorage.removeItem('aiagent_preferences');
+        this.applyPreferences();
+        this.showPreferences(); // Refresh the modal
+        this.showNotification('Preferences reset to defaults', 'success');
+    }
+
+    handleDisconnection(reason) {
+        // Handle different disconnection reasons
+        if (reason === 'io server disconnect') {
+            this.showNotification('Server disconnected. Attempting to reconnect...', 'warning');
+        } else if (reason === 'transport close') {
+            this.showNotification('Connection lost. Checking network...', 'warning');
+        }
+
+        // Clear real-time features
+        this.activeUsers.clear();
+        this.cursors.clear();
+        this.selections.clear();
+        this.updatePresenceIndicators();
+    }
+
+    // Enhanced live editing methods
+    broadcastEdit(elementId, content, cursorPosition) {
+        if (this.socket && this.socket.connected && this.collaborationMode) {
+            this.socket.emit('live-edit', {
+                userId: this.getUserId(),
+                elementId,
+                content,
+                cursorPosition,
+                timestamp: Date.now()
+            });
+        }
+    }
+
+    broadcastSelection(elementId, start, end) {
+        if (this.socket && this.socket.connected && this.collaborationMode) {
+            this.socket.emit('selection-update', {
+                userId: this.getUserId(),
+                elementId,
+                start,
+                end,
+                timestamp: Date.now()
+            });
+        }
+    }
+
+    handleLiveEdit(data) {
+        if (data.userId === this.getUserId()) return; // Ignore own edits
+
+        const element = document.getElementById(data.elementId);
+        if (element && element.value !== data.content) {
+            const currentCursor = element.selectionStart;
+            element.value = data.content;
+
+            // Try to maintain cursor position
+            if (currentCursor <= data.content.length) {
+                element.setSelectionRange(currentCursor, currentCursor);
+            }
+
+            // Show visual indicator of remote edit
+            this.showRemoteEditIndicator(element, data.userId);
+        }
+    }
+
+    handleCursorUpdate(data) {
+        if (data.userId === this.getUserId()) return;
+
+        this.cursors.set(data.userId, data);
+        this.updateCursorDisplay(data);
+    }
+
+    handleSelectionUpdate(data) {
+        if (data.userId === this.getUserId()) return;
+
+        this.selections.set(data.userId, data);
+        this.updateSelectionDisplay(data);
+    }
+
+    showRemoteEditIndicator(element, userId) {
+        const indicator = document.createElement('div');
+        indicator.className = 'remote-edit-indicator';
+        indicator.style.backgroundColor = this.getUserColor(userId);
+        indicator.textContent = this.activeUsers.get(userId)?.userName?.charAt(0) || '?';
+
+        element.parentElement.appendChild(indicator);
+
+        setTimeout(() => {
+            if (indicator.parentElement) {
+                indicator.remove();
+            }
+        }, 2000);
+    }
+
+    updateCursorDisplay(data) {
+        // Implementation for showing remote cursors
+        const element = document.getElementById(data.elementId);
+        if (!element) return;
+
+        // Remove existing cursor for this user
+        const existingCursor = document.querySelector(`[data-user-cursor="${data.userId}"]`);
+        if (existingCursor) {
+            existingCursor.remove();
+        }
+
+        // Create new cursor indicator
+        const cursor = document.createElement('div');
+        cursor.className = 'remote-cursor';
+        cursor.setAttribute('data-user-cursor', data.userId);
+        cursor.style.backgroundColor = this.getUserColor(data.userId);
+
+        // Position cursor (simplified - would need more complex positioning for text areas)
+        const rect = element.getBoundingClientRect();
+        cursor.style.left = rect.left + 'px';
+        cursor.style.top = rect.top + 'px';
+
+        document.body.appendChild(cursor);
+    }
+
+    updateSelectionDisplay(data) {
+        // Implementation for showing remote selections
+        const element = document.getElementById(data.elementId);
+        if (!element) return;
+
+        // This would require more complex implementation for proper text selection highlighting
+        console.log('Remote selection update:', data);
+    }
+
+    // Enhanced stream handling
+    handleStreamChunk(data) {
+        const messageElement = document.querySelector(`[data-message-id="${data.messageId}"]`);
+        if (messageElement) {
+            const contentElement = messageElement.querySelector('.message-content');
+            if (contentElement) {
+                contentElement.textContent += data.chunk;
+
+                // Auto-scroll to bottom
+                const chatMessages = document.getElementById('chat-messages');
+                if (chatMessages) {
+                    chatMessages.scrollTop = chatMessages.scrollHeight;
+                }
+            }
+        }
+    }
+
+    handleChainProgress(data) {
+        const progressElement = document.querySelector(`[data-chain-id="${data.chainId}"] .progress-bar`);
+        if (progressElement) {
+            const percentage = (data.completed / data.total) * 100;
+            progressElement.style.width = percentage + '%';
+
+            const statusElement = progressElement.parentElement.querySelector('.progress-status');
+            if (statusElement) {
+                statusElement.textContent = `${data.step} (${data.completed}/${data.total})`;
+            }
+        }
+    }
+
+    handleFileChanged(data) {
+        // Handle file system changes
+        this.showNotification(`File ${data.action}: ${data.path}`, 'info', 3000);
+
+        // Update file explorer if visible
+        if (this.currentView === 'files') {
+            this.loadFiles();
+        }
+
+        // Update workspace state
+        const openFiles = this.workspaceState.get('openFiles') || [];
+        if (data.action === 'deleted' && openFiles.includes(data.path)) {
+            const updatedFiles = openFiles.filter(file => file !== data.path);
+            this.workspaceState.set('openFiles', updatedFiles);
+        }
+    }
+
+    updatePerformanceDisplay(data) {
+        // Update performance metrics from server
+        Object.assign(this.performanceMetrics, data);
+        this.updatePerformanceMetrics();
+    }
 }
+
+// Supporting classes for enhanced web interface
+class ConflictResolver {
+    constructor() {
+        this.conflicts = new Map();
+        this.resolutionStrategies = new Map();
+        this.initializeStrategies();
+    }
+
+    initializeStrategies() {
+        this.resolutionStrategies.set('last-write-wins', this.lastWriteWins.bind(this));
+        this.resolutionStrategies.set('merge', this.mergeChanges.bind(this));
+        this.resolutionStrategies.set('user-choice', this.promptUserChoice.bind(this));
+    }
+
+    detectConflict(localChange, remoteChange) {
+        // Simple conflict detection
+        return localChange.elementId === remoteChange.elementId &&
+               Math.abs(localChange.timestamp - remoteChange.timestamp) < 1000; // Within 1 second
+    }
+
+    resolveConflict(localChange, remoteChange, strategy = 'last-write-wins') {
+        const resolver = this.resolutionStrategies.get(strategy);
+        if (resolver) {
+            return resolver(localChange, remoteChange);
+        }
+        return this.lastWriteWins(localChange, remoteChange);
+    }
+
+    lastWriteWins(localChange, remoteChange) {
+        return localChange.timestamp > remoteChange.timestamp ? localChange : remoteChange;
+    }
+
+    mergeChanges(localChange, remoteChange) {
+        // Simple merge strategy - in practice, this would be more sophisticated
+        return {
+            ...localChange,
+            content: localChange.content + '\n' + remoteChange.content,
+            merged: true
+        };
+    }
+
+    promptUserChoice(localChange, remoteChange) {
+        // Show modal for user to choose resolution
+        return new Promise((resolve) => {
+            const modal = document.createElement('div');
+            modal.className = 'conflict-resolution-modal';
+            modal.innerHTML = `
+                <div class="modal-content">
+                    <h3>Conflict Resolution</h3>
+                    <p>There's a conflict in ${localChange.elementId}. Choose how to resolve:</p>
+                    <div class="conflict-options">
+                        <button onclick="resolve(localChange)">Keep My Changes</button>
+                        <button onclick="resolve(remoteChange)">Keep Remote Changes</button>
+                        <button onclick="resolve(merge(localChange, remoteChange))">Merge Both</button>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(modal);
+        });
+    }
+}
+
+// Initialize the enhanced app
+const app = new AIAgentApp();
 
 // Initialize app when DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {

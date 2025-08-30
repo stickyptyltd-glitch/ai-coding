@@ -1,5 +1,6 @@
 import crypto from 'crypto';
 import fs from 'fs';
+import path from 'path';
 
 function b64urlDecode(input) {
   const pad = input.length % 4 === 2 ? '==' : input.length % 4 === 3 ? '=' : '';
@@ -74,18 +75,116 @@ export function validateLicenseEnv(now = Date.now()) {
     return { valid: false, reason: 'License expired' };
   }
 
+  // Advanced license validation
+  const validation = performAdvancedValidation(payload, now);
+  if (!validation.valid) {
+    return validation;
+  }
+
   // Signature verification: prefer public key, else HMAC secret
   const pub = resolvePublicKeyFromEnv();
   if (pub && verifyWithPublicKey(unsigned, sig, pub)) {
-    return { valid: true, claims: payload, method: 'public-key' };
+    return { valid: true, claims: payload, method: 'public-key', features: validation.features };
   }
 
   const secret = process.env.LICENSE_SECRET;
   if (secret && verifyWithHmac(unsigned, sig, secret)) {
-    return { valid: true, claims: payload, method: 'hmac' };
+    return { valid: true, claims: payload, method: 'hmac', features: validation.features };
   }
 
   return { valid: false, reason: 'Signature verification failed' };
+}
+
+function performAdvancedValidation(payload, now) {
+  const features = {
+    tier: payload.tier || 'basic',
+    maxAgents: payload.maxAgents || 1,
+    maxUsers: payload.maxUsers || 1,
+    enterpriseFeatures: payload.enterprise || false,
+    apiAccess: payload.apiAccess || false,
+    supportLevel: payload.support || 'community'
+  };
+
+  // Validate license tier constraints
+  if (payload.nbf && now < payload.nbf * 1000) {
+    return { valid: false, reason: 'License not yet valid' };
+  }
+
+  // Check usage limits if specified
+  if (payload.maxRequests && getUsageCount() > payload.maxRequests) {
+    return { valid: false, reason: 'Usage limit exceeded' };
+  }
+
+  // Validate hardware fingerprint for enterprise licenses
+  if (payload.enterprise && payload.hardwareId) {
+    const currentHwId = generateHardwareFingerprint();
+    if (currentHwId !== payload.hardwareId) {
+      return { valid: false, reason: 'Hardware fingerprint mismatch' };
+    }
+  }
+
+  return { valid: true, features };
+}
+
+function generateHardwareFingerprint() {
+  const os = require('os');
+  const data = {
+    platform: os.platform(),
+    arch: os.arch(),
+    hostname: os.hostname(),
+    cpus: os.cpus().length,
+    totalmem: os.totalmem()
+  };
+  return crypto.createHash('sha256').update(JSON.stringify(data)).digest('hex').substring(0, 16);
+}
+
+function getUsageCount() {
+  try {
+    const usageFile = path.join(process.cwd(), 'data', 'usage.json');
+    if (fs.existsSync(usageFile)) {
+      const usage = JSON.parse(fs.readFileSync(usageFile, 'utf8'));
+      return usage.totalRequests || 0;
+    }
+  } catch (e) {
+    console.warn('Failed to read usage data:', e.message);
+  }
+  return 0;
+}
+
+export function logLicenseUsage(action = 'api_call') {
+  try {
+    const usageFile = path.join(process.cwd(), 'data', 'usage.json');
+    let usage = { totalRequests: 0, lastActivity: null, dailyUsage: {} };
+    
+    if (fs.existsSync(usageFile)) {
+      usage = JSON.parse(fs.readFileSync(usageFile, 'utf8'));
+    }
+    
+    const today = new Date().toISOString().split('T')[0];
+    usage.totalRequests = (usage.totalRequests || 0) + 1;
+    usage.lastActivity = new Date().toISOString();
+    usage.dailyUsage[today] = (usage.dailyUsage[today] || 0) + 1;
+    
+    fs.writeFileSync(usageFile, JSON.stringify(usage, null, 2));
+  } catch (e) {
+    console.warn('Failed to log usage:', e.message);
+  }
+}
+
+export function getLicenseInfo() {
+  const result = validateLicenseEnv();
+  if (!result.valid) {
+    return { valid: false, error: result.reason };
+  }
+  
+  return {
+    valid: true,
+    tier: result.features?.tier || 'basic',
+    features: result.features,
+    method: result.method,
+    usage: getUsageCount(),
+    expires: result.claims?.exp ? new Date(result.claims.exp * 1000).toISOString() : null
+  };
 }
 
 export function ensureLicenseOrExit() {
@@ -93,7 +192,12 @@ export function ensureLicenseOrExit() {
   if (process.env.NODE_ENV === 'test') return;
   const result = validateLicenseEnv();
   if (!result.valid) {
-    console.error(`License check failed: ${result.reason}`);
+    console.error(`\n🔐 License Validation Failed: ${result.reason}`);
+    console.error('📧 Please contact support or visit our licensing page.');
+    console.error('🔗 Upgrade options: https://your-domain.com/pricing\n');
     process.exit(1);
+  } else {
+    const info = getLicenseInfo();
+    console.log(`✅ License validated - Tier: ${info.tier}`);
   }
 }

@@ -5,15 +5,98 @@ export class MultiAgentSystem {
     this.agent = agent;
     this.agents = new Map();
     this.conversations = new Map();
+    this.taskQueue = [];
+    this.activeCollaborations = new Map();
+    this.agentPerformance = new Map();
+    this.communicationChannels = new Map();
+    this.consensusEngine = new ConsensusEngine();
+    this.taskDelegator = new TaskDelegator();
+    this.agentFactory = new DynamicAgentFactory();
+    this.coordinationProtocols = new Map();
+
     this.initializeAgents();
+    this.initializeCoordinationProtocols();
+  }
+
+  initializeCoordinationProtocols() {
+    // Define coordination protocols for different types of tasks
+    this.coordinationProtocols.set('code_review', {
+      phases: ['individual_review', 'discussion', 'consensus', 'final_decision'],
+      requiredAgents: ['senior_dev', 'security_expert', 'performance_expert'],
+      optionalAgents: ['tester', 'doc_writer'],
+      timeoutPerPhase: 30000, // 30 seconds
+      consensusThreshold: 0.7
+    });
+
+    this.coordinationProtocols.set('architecture_design', {
+      phases: ['requirements_analysis', 'design_proposals', 'evaluation', 'refinement', 'finalization'],
+      requiredAgents: ['architect', 'senior_dev', 'devops_expert'],
+      optionalAgents: ['security_expert', 'performance_expert'],
+      timeoutPerPhase: 60000, // 60 seconds
+      consensusThreshold: 0.8
+    });
+
+    this.coordinationProtocols.set('debugging', {
+      phases: ['error_analysis', 'hypothesis_generation', 'solution_proposals', 'validation'],
+      requiredAgents: ['debugger', 'senior_dev'],
+      optionalAgents: ['security_expert', 'tester'],
+      timeoutPerPhase: 45000, // 45 seconds
+      consensusThreshold: 0.6
+    });
+
+    console.log(chalk.blue('🤝 Coordination protocols initialized'));
+  }
+
+  async initialize() {
+    try {
+      // Initialize all subsystems
+      await this.consensusEngine.initialize();
+      await this.taskDelegator.initialize();
+      await this.agentFactory.initialize();
+
+      // Set up communication channels
+      this.setupCommunicationChannels();
+
+      console.log(chalk.green('✅ Multi-Agent System fully initialized'));
+      return { success: true };
+    } catch (error) {
+      console.log(chalk.red('❌ Multi-Agent System initialization failed:', error.message));
+      return { success: false, error: error.message };
+    }
+  }
+
+  setupCommunicationChannels() {
+    // Create communication channels between agents
+    const agentIds = Array.from(this.agents.keys());
+
+    for (const agentId of agentIds) {
+      this.communicationChannels.set(agentId, {
+        inbox: [],
+        outbox: [],
+        subscriptions: new Set(),
+        messageHistory: []
+      });
+    }
+
+    // Set up broadcast channel for system-wide messages
+    this.communicationChannels.set('broadcast', {
+      subscribers: new Set(agentIds),
+      messageHistory: []
+    });
   }
 
   initializeAgents() {
-    // Senior Developer Agent
+    // Enhanced Senior Developer Agent
     this.agents.set('senior_dev', {
+      id: 'senior_dev',
       role: 'Senior Developer',
       personality: 'Experienced, architectural thinking, best practices focused',
       expertise: ['system design', 'performance', 'scalability', 'code review'],
+      capabilities: ['code_analysis', 'architecture_review', 'mentoring', 'technical_leadership'],
+      communicationStyle: 'direct_and_technical',
+      workload: 0,
+      availability: 1.0,
+      performanceScore: 0.9,
       systemPrompt: `You are a Senior Developer with 10+ years of experience. You focus on:
 - Architectural decisions and system design
 - Performance optimization and scalability
@@ -25,11 +108,17 @@ Respond in a professional, mentoring tone. Provide strategic insights and long-t
       emoji: '🏗️'
     });
 
-    // Tester Agent
+    // Enhanced Tester Agent
     this.agents.set('tester', {
+      id: 'tester',
       role: 'QA Engineer',
       personality: 'Detail-oriented, thorough, edge-case focused',
       expertise: ['testing strategies', 'edge cases', 'automation', 'quality assurance'],
+      capabilities: ['test_design', 'automation_setup', 'bug_detection', 'quality_metrics'],
+      communicationStyle: 'methodical_and_detailed',
+      workload: 0,
+      availability: 1.0,
+      performanceScore: 0.88,
       systemPrompt: `You are an expert QA Engineer focused on testing and quality. You excel at:
 - Identifying edge cases and potential bugs
 - Creating comprehensive test strategies
@@ -106,37 +195,90 @@ Think like an attacker - what could be exploited? How can we make this more secu
     });
   }
 
-  async collaborate(task, agentRoles = ['senior_dev', 'tester', 'doc_writer'], options = {}) {
-    console.log(chalk.blue(`🤝 Starting multi-agent collaboration on: ${task}`));
-    
+  // Enhanced collaboration with dynamic agent selection and coordination protocols
+  async collaborate(task, agentRoles = null, options = {}) {
+    console.log(chalk.blue(`🤝 Starting enhanced multi-agent collaboration on: ${task}`));
+
     const conversationId = this.generateConversationId();
+
+    // Dynamic agent selection if not specified
+    if (!agentRoles) {
+      agentRoles = await this.selectOptimalAgents(task, options);
+      console.log(chalk.cyan(`🎯 Selected agents: ${agentRoles.join(', ')}`));
+    }
+
+    // Determine coordination protocol
+    const protocol = this.determineCoordinationProtocol(task, agentRoles);
+    console.log(chalk.cyan(`📋 Using protocol: ${protocol.name}`));
+
     const collaboration = {
       id: conversationId,
       task,
       participants: agentRoles,
+      protocol,
       startTime: new Date(),
+      phases: [],
       discussions: [],
       decisions: [],
-      outputs: {}
+      outputs: {},
+      metrics: {
+        totalTime: 0,
+        phaseTimings: {},
+        participationRates: {},
+        consensusScore: 0
+      }
     };
 
-    this.conversations.set(conversationId, collaboration);
+    this.activeCollaborations.set(conversationId, collaboration);
 
     try {
-      // Phase 1: Individual Analysis
-      console.log(chalk.cyan('📋 Phase 1: Individual Analysis'));
-      const analyses = await this.gatherIndividualAnalyses(task, agentRoles);
-      collaboration.discussions.push(...analyses);
+      // Execute coordination protocol phases
+      for (const phase of protocol.phases) {
+        const phaseStartTime = Date.now();
+        console.log(chalk.cyan(`🔄 Phase: ${phase}`));
 
-      // Phase 2: Cross-Agent Discussion
-      console.log(chalk.cyan('💬 Phase 2: Cross-Agent Discussion'));
-      const discussions = await this.facilitateDiscussion(task, analyses, agentRoles);
-      collaboration.discussions.push(...discussions);
+        const phaseResult = await this.executeCollaborationPhase(
+          phase,
+          task,
+          collaboration,
+          agentRoles,
+          options
+        );
 
-      // Phase 3: Consensus Building
-      console.log(chalk.cyan('🤝 Phase 3: Building Consensus'));
-      const consensus = await this.buildConsensus(task, collaboration.discussions, agentRoles);
-      collaboration.decisions.push(consensus);
+        const phaseDuration = Date.now() - phaseStartTime;
+        collaboration.phases.push({
+          name: phase,
+          result: phaseResult,
+          duration: phaseDuration,
+          timestamp: new Date()
+        });
+
+        collaboration.metrics.phaseTimings[phase] = phaseDuration;
+
+        // Check for early termination conditions
+        if (phaseResult.shouldTerminate) {
+          console.log(chalk.yellow(`⏹️ Early termination in phase: ${phase}`));
+          break;
+        }
+      }
+
+      // Final consensus and output generation
+      const finalResult = await this.generateFinalOutput(collaboration);
+      collaboration.outputs.final = finalResult;
+      collaboration.metrics.totalTime = Date.now() - collaboration.startTime.getTime();
+
+      // Update agent performance metrics
+      this.updateAgentPerformanceMetrics(collaboration);
+
+      console.log(chalk.green(`✅ Collaboration completed in ${collaboration.metrics.totalTime}ms`));
+
+      return {
+        success: true,
+        collaborationId: conversationId,
+        result: finalResult,
+        metrics: collaboration.metrics,
+        participants: agentRoles
+      };
 
       // Phase 4: Deliverable Generation
       console.log(chalk.cyan('📦 Phase 4: Generating Deliverables'));
@@ -162,6 +304,138 @@ Think like an attacker - what could be exploited? How can we make this more secu
         partialResults: collaboration
       };
     }
+  }
+
+  // Enhanced methods for improved multi-agent coordination
+  determineCoordinationProtocol(task, agentRoles) {
+    const taskLower = task.toLowerCase();
+
+    // Check for specific protocol matches
+    for (const [protocolName, protocol] of this.coordinationProtocols) {
+      if (taskLower.includes(protocolName.replace('_', ' '))) {
+        return { name: protocolName, ...protocol };
+      }
+    }
+
+    // Default protocol based on agent count and task complexity
+    if (agentRoles.length > 4) {
+      return {
+        name: 'large_group_consensus',
+        phases: ['individual_analysis', 'subgroup_discussion', 'cross_group_synthesis', 'final_consensus'],
+        timeoutPerPhase: 45000,
+        consensusThreshold: 0.75
+      };
+    } else if (taskLower.includes('urgent') || taskLower.includes('critical')) {
+      return {
+        name: 'rapid_response',
+        phases: ['quick_analysis', 'immediate_decision'],
+        timeoutPerPhase: 15000,
+        consensusThreshold: 0.6
+      };
+    } else {
+      return {
+        name: 'standard_collaboration',
+        phases: ['individual_analysis', 'discussion', 'consensus', 'validation'],
+        timeoutPerPhase: 30000,
+        consensusThreshold: 0.7
+      };
+    }
+  }
+
+  async executeCollaborationPhase(phase, task, collaboration, agentRoles, options) {
+    const phaseStartTime = Date.now();
+    const timeout = collaboration.protocol.timeoutPerPhase || 30000;
+
+    try {
+      switch (phase) {
+        case 'individual_analysis':
+          return await this.executeIndividualAnalysis(task, agentRoles, timeout);
+
+        case 'discussion':
+        case 'subgroup_discussion':
+        case 'cross_group_synthesis':
+          return await this.executeDiscussionPhase(task, collaboration, agentRoles, timeout);
+
+        case 'consensus':
+        case 'final_consensus':
+          return await this.executeConsensusPhase(task, collaboration, agentRoles, timeout);
+
+        case 'validation':
+          return await this.executeValidationPhase(task, collaboration, agentRoles, timeout);
+
+        case 'quick_analysis':
+          return await this.executeQuickAnalysis(task, agentRoles, timeout / 2);
+
+        case 'immediate_decision':
+          return await this.executeImmediateDecision(task, collaboration, agentRoles, timeout / 2);
+
+        default:
+          throw new Error(`Unknown collaboration phase: ${phase}`);
+      }
+    } catch (error) {
+      console.log(chalk.red(`❌ Phase ${phase} failed: ${error.message}`));
+      return {
+        success: false,
+        error: error.message,
+        phase,
+        duration: Date.now() - phaseStartTime
+      };
+    }
+  }
+
+  async executeIndividualAnalysis(task, agentRoles, timeout) {
+    console.log(chalk.blue('🔍 Executing individual analysis phase'));
+
+    const analyses = await Promise.allSettled(
+      agentRoles.map(async (roleId) => {
+        const agent = this.agents.get(roleId);
+        if (!agent) throw new Error(`Agent ${roleId} not found`);
+
+        const analysisPrompt = `${agent.systemPrompt}
+
+Task: ${task}
+
+Provide your individual analysis from your perspective as a ${agent.role}. Focus on:
+1. Key considerations from your domain expertise
+2. Potential challenges or risks you foresee
+3. Your recommended approach or solution
+4. Dependencies or requirements you identify
+
+Be concise but thorough. Limit to 200 words.`;
+
+        const response = await this.agent.aiProvider.query(analysisPrompt, {
+          taskType: 'individual_analysis',
+          maxTokens: 300,
+          timeout: timeout * 0.8 // Leave buffer for processing
+        });
+
+        return {
+          agent: roleId,
+          role: agent.role,
+          analysis: response,
+          timestamp: new Date()
+        };
+      })
+    );
+
+    const successfulAnalyses = analyses
+      .filter(result => result.status === 'fulfilled')
+      .map(result => result.value);
+
+    const failedAnalyses = analyses
+      .filter(result => result.status === 'rejected')
+      .map(result => ({ error: result.reason.message }));
+
+    if (failedAnalyses.length > 0) {
+      console.log(chalk.yellow(`⚠️ ${failedAnalyses.length} analyses failed`));
+    }
+
+    return {
+      success: true,
+      analyses: successfulAnalyses,
+      failures: failedAnalyses,
+      participationRate: successfulAnalyses.length / agentRoles.length
+    };
   }
 
   async gatherIndividualAnalyses(task, agentRoles) {
@@ -540,5 +814,786 @@ Keep your response concise (2-3 sentences).`;
       expertise: agent.expertise,
       emoji: agent.emoji
     }));
+  }
+
+  // Enhanced coordination methods
+  updateAgentPerformanceMetrics(collaboration) {
+    for (const agentId of collaboration.participants) {
+      const existing = this.agentPerformance.get(agentId) || {
+        collaborations: 0,
+        totalTime: 0,
+        successRate: 0,
+        averageConfidence: 0,
+        participationRate: 0
+      };
+
+      existing.collaborations++;
+      existing.totalTime += collaboration.metrics.totalTime;
+
+      // Calculate success rate
+      const wasSuccessful = collaboration.outputs.final && collaboration.metrics.consensusScore > 0.6;
+      existing.successRate = ((existing.successRate * (existing.collaborations - 1)) + (wasSuccessful ? 1 : 0)) / existing.collaborations;
+
+      // Update agent's performance score
+      const agent = this.agents.get(agentId);
+      if (agent) {
+        agent.performanceScore = existing.successRate;
+        agent.workload = Math.max(0, agent.workload - 0.1); // Reduce workload after completion
+      }
+
+      this.agentPerformance.set(agentId, existing);
+    }
+  }
+
+  // Dynamic agent creation
+  async createSpecializedAgent(requirements) {
+    const agentId = `dynamic_${Date.now()}`;
+    const agent = await this.agentFactory.createAgent({
+      id: agentId,
+      requirements,
+      baseTemplate: this.selectBestTemplate(requirements)
+    });
+
+    this.agents.set(agentId, agent);
+    this.setupCommunicationChannel(agentId);
+
+    console.log(chalk.green(`✨ Created specialized agent: ${agent.role}`));
+    return agentId;
+  }
+
+  selectBestTemplate(requirements) {
+    const templates = ['senior_dev', 'security_expert', 'tester', 'doc_writer', 'devops'];
+
+    // Simple matching based on keywords
+    const reqLower = requirements.toLowerCase();
+    if (reqLower.includes('security')) return 'security_expert';
+    if (reqLower.includes('test')) return 'tester';
+    if (reqLower.includes('document')) return 'doc_writer';
+    if (reqLower.includes('deploy') || reqLower.includes('infrastructure')) return 'devops';
+
+    return 'senior_dev'; // Default
+  }
+
+  setupCommunicationChannel(agentId) {
+    this.communicationChannels.set(agentId, {
+      inbox: [],
+      outbox: [],
+      subscriptions: new Set(),
+      messageHistory: []
+    });
+  }
+
+  // Agent communication methods
+  async sendMessage(fromAgent, toAgent, message, priority = 'normal') {
+    const timestamp = new Date();
+    const messageObj = {
+      id: `msg_${Date.now()}`,
+      from: fromAgent,
+      to: toAgent,
+      content: message,
+      priority,
+      timestamp,
+      status: 'sent'
+    };
+
+    // Add to sender's outbox
+    const senderChannel = this.communicationChannels.get(fromAgent);
+    if (senderChannel) {
+      senderChannel.outbox.push(messageObj);
+      senderChannel.messageHistory.push(messageObj);
+    }
+
+    // Add to receiver's inbox
+    const receiverChannel = this.communicationChannels.get(toAgent);
+    if (receiverChannel) {
+      receiverChannel.inbox.push(messageObj);
+      receiverChannel.messageHistory.push(messageObj);
+      messageObj.status = 'delivered';
+    }
+
+    return messageObj;
+  }
+
+  async broadcastMessage(fromAgent, message, priority = 'normal') {
+    const broadcastChannel = this.communicationChannels.get('broadcast');
+    if (!broadcastChannel) return;
+
+    const messageObj = {
+      id: `broadcast_${Date.now()}`,
+      from: fromAgent,
+      to: 'all',
+      content: message,
+      priority,
+      timestamp: new Date(),
+      status: 'broadcast'
+    };
+
+    broadcastChannel.messageHistory.push(messageObj);
+
+    // Deliver to all subscribed agents
+    for (const agentId of broadcastChannel.subscribers) {
+      if (agentId !== fromAgent) {
+        const channel = this.communicationChannels.get(agentId);
+        if (channel) {
+          channel.inbox.push(messageObj);
+        }
+      }
+    }
+
+    return messageObj;
+  }
+
+  getAgentMessages(agentId, type = 'inbox') {
+    const channel = this.communicationChannels.get(agentId);
+    return channel ? channel[type] : [];
+  }
+
+  clearAgentMessages(agentId, type = 'inbox') {
+    const channel = this.communicationChannels.get(agentId);
+    if (channel) {
+      channel[type] = [];
+    }
+  }
+
+  // Performance monitoring
+  getSystemMetrics() {
+    return {
+      totalAgents: this.agents.size,
+      activeCollaborations: this.activeCollaborations.size,
+      totalConversations: this.conversations.size,
+      agentPerformance: Object.fromEntries(this.agentPerformance),
+      communicationStats: this.getCommunicationStats()
+    };
+  }
+
+  getCommunicationStats() {
+    const stats = {
+      totalMessages: 0,
+      broadcastMessages: 0,
+      averageResponseTime: 0
+    };
+
+    for (const [agentId, channel] of this.communicationChannels) {
+      if (agentId === 'broadcast') {
+        stats.broadcastMessages += channel.messageHistory.length;
+      } else {
+        stats.totalMessages += channel.messageHistory.length;
+      }
+    }
+
+    return stats;
+  }
+}
+
+// Supporting classes for enhanced multi-agent coordination
+class ConsensusEngine {
+  constructor() {
+    this.consensusHistory = [];
+    this.votingStrategies = new Map();
+    this.initializeVotingStrategies();
+  }
+
+  async initialize() {
+    console.log(chalk.blue('🤝 Consensus Engine initialized'));
+  }
+
+  initializeVotingStrategies() {
+    this.votingStrategies.set('majority', this.majorityVoting.bind(this));
+    this.votingStrategies.set('weighted', this.weightedVoting.bind(this));
+    this.votingStrategies.set('unanimous', this.unanimousVoting.bind(this));
+    this.votingStrategies.set('democratic', this.democraticVoting.bind(this));
+  }
+
+  async buildConsensus({ task, content, participants, threshold = 0.7, timeout, strategy = 'democratic' }) {
+    const startTime = Date.now();
+
+    try {
+      // Parse agent contributions
+      const contributions = this.parseContributions(content);
+
+      // Apply voting strategy
+      const votingStrategy = this.votingStrategies.get(strategy) || this.democraticVoting.bind(this);
+      const consensusResult = await votingStrategy(contributions, participants, threshold);
+
+      // Record consensus history
+      this.consensusHistory.push({
+        task,
+        participants,
+        strategy,
+        result: consensusResult,
+        timestamp: new Date(),
+        processingTime: Date.now() - startTime
+      });
+
+      return consensusResult;
+
+    } catch (error) {
+      console.log(chalk.red('Consensus building failed:', error.message));
+      return {
+        consensus: 'Unable to reach consensus due to processing error',
+        agreements: [],
+        disagreements: [],
+        score: 0.3,
+        error: error.message
+      };
+    }
+  }
+
+  parseContributions(content) {
+    // Simple parsing - in practice, this would be more sophisticated
+    const lines = content.split('\n');
+    const contributions = [];
+    let currentAgent = null;
+    let currentContent = '';
+
+    for (const line of lines) {
+      const agentMatch = line.match(/^(\w+):\s*(.+)/);
+      if (agentMatch) {
+        if (currentAgent && currentContent) {
+          contributions.push({
+            agent: currentAgent,
+            content: currentContent.trim(),
+            sentiment: this.analyzeSentiment(currentContent),
+            keywords: this.extractKeywords(currentContent)
+          });
+        }
+        currentAgent = agentMatch[1];
+        currentContent = agentMatch[2];
+      } else if (currentAgent && line.trim()) {
+        currentContent += ' ' + line.trim();
+      }
+    }
+
+    // Add the last contribution
+    if (currentAgent && currentContent) {
+      contributions.push({
+        agent: currentAgent,
+        content: currentContent.trim(),
+        sentiment: this.analyzeSentiment(currentContent),
+        keywords: this.extractKeywords(currentContent)
+      });
+    }
+
+    return contributions;
+  }
+
+  analyzeSentiment(text) {
+    // Simple sentiment analysis
+    const positiveWords = ['good', 'excellent', 'great', 'effective', 'optimal', 'recommend'];
+    const negativeWords = ['bad', 'poor', 'ineffective', 'problematic', 'risky', 'concern'];
+
+    const words = text.toLowerCase().split(/\s+/);
+    const positive = words.filter(word => positiveWords.includes(word)).length;
+    const negative = words.filter(word => negativeWords.includes(word)).length;
+
+    if (positive > negative) return 'positive';
+    if (negative > positive) return 'negative';
+    return 'neutral';
+  }
+
+  extractKeywords(text) {
+    // Simple keyword extraction
+    const commonWords = ['the', 'a', 'an', 'and', 'or', 'but', 'in', 'on', 'at', 'to', 'for', 'of', 'with', 'by'];
+    const words = text.toLowerCase()
+      .replace(/[^\w\s]/g, '')
+      .split(/\s+/)
+      .filter(word => word.length > 3 && !commonWords.includes(word));
+
+    // Count word frequency
+    const wordCount = {};
+    words.forEach(word => {
+      wordCount[word] = (wordCount[word] || 0) + 1;
+    });
+
+    // Return top keywords
+    return Object.entries(wordCount)
+      .sort(([,a], [,b]) => b - a)
+      .slice(0, 5)
+      .map(([word]) => word);
+  }
+
+  async democraticVoting(contributions, participants, threshold) {
+    // Democratic consensus building with equal weight for all participants
+    const agreements = [];
+    const disagreements = [];
+    const keywordFrequency = {};
+
+    // Analyze common themes
+    contributions.forEach(contrib => {
+      contrib.keywords.forEach(keyword => {
+        keywordFrequency[keyword] = (keywordFrequency[keyword] || 0) + 1;
+      });
+    });
+
+    // Find consensus themes (keywords mentioned by multiple agents)
+    const consensusThemes = Object.entries(keywordFrequency)
+      .filter(([, count]) => count >= Math.ceil(participants.length * threshold))
+      .map(([keyword]) => keyword);
+
+    // Build consensus statement
+    const consensus = this.buildConsensusStatement(contributions, consensusThemes);
+
+    // Calculate consensus score
+    const positiveContributions = contributions.filter(c => c.sentiment === 'positive').length;
+    const score = Math.min(1.0, (positiveContributions / contributions.length) + (consensusThemes.length * 0.1));
+
+    return {
+      consensus,
+      agreements: consensusThemes,
+      disagreements: this.identifyDisagreements(contributions),
+      score,
+      strategy: 'democratic',
+      participationRate: contributions.length / participants.length
+    };
+  }
+
+  buildConsensusStatement(contributions, themes) {
+    if (themes.length === 0) {
+      return 'No clear consensus emerged from the discussion. Further deliberation may be needed.';
+    }
+
+    const themeText = themes.slice(0, 3).join(', ');
+    return `The team reached consensus around key themes including: ${themeText}. The proposed approach should incorporate these elements while addressing individual concerns raised by team members.`;
+  }
+
+  identifyDisagreements(contributions) {
+    const negativeContributions = contributions
+      .filter(c => c.sentiment === 'negative')
+      .map(c => `${c.agent}: ${c.content.substring(0, 100)}...`);
+
+    return negativeContributions.slice(0, 3); // Limit to top 3 disagreements
+  }
+
+  majorityVoting(contributions, participants, threshold) {
+    // Simple majority voting implementation
+    return this.democraticVoting(contributions, participants, 0.5);
+  }
+
+  weightedVoting(contributions, participants, threshold) {
+    // Weighted voting based on agent expertise (simplified)
+    return this.democraticVoting(contributions, participants, threshold);
+  }
+
+  unanimousVoting(contributions, participants, threshold) {
+    // Unanimous consensus requirement
+    return this.democraticVoting(contributions, participants, 1.0);
+  }
+}
+
+class TaskDelegator {
+  constructor() {
+    this.delegationHistory = [];
+    this.workloadTracking = new Map();
+  }
+
+  async initialize() {
+    console.log(chalk.blue('📋 Task Delegator initialized'));
+  }
+
+  async delegateTask(task, availableAgents, requirements = {}) {
+    const startTime = Date.now();
+
+    // Analyze task complexity and requirements
+    const taskAnalysis = this.analyzeTask(task, requirements);
+
+    // Score and rank agents
+    const agentScores = this.scoreAgents(availableAgents, taskAnalysis);
+
+    // Create delegation plan
+    const delegation = {
+      taskId: `task_${Date.now()}`,
+      task,
+      primaryAgent: agentScores[0]?.id,
+      supportingAgents: agentScores.slice(1, Math.min(4, agentScores.length)).map(a => a.id),
+      taskBreakdown: this.breakdownTask(task, taskAnalysis),
+      estimatedDuration: taskAnalysis.estimatedDuration,
+      priority: requirements.priority || 'normal',
+      timestamp: new Date()
+    };
+
+    // Update workload tracking
+    this.updateWorkloadTracking(delegation);
+
+    // Record delegation history
+    this.delegationHistory.push({
+      ...delegation,
+      processingTime: Date.now() - startTime
+    });
+
+    return delegation;
+  }
+
+  analyzeTask(task, requirements) {
+    const taskLower = task.toLowerCase();
+    const analysis = {
+      complexity: 0.5,
+      urgency: 0.5,
+      estimatedDuration: 30, // minutes
+      requiredSkills: [],
+      riskLevel: 'medium'
+    };
+
+    // Complexity analysis
+    const complexityIndicators = ['complex', 'advanced', 'enterprise', 'scalable', 'distributed', 'architecture'];
+    analysis.complexity = Math.min(1.0, complexityIndicators.filter(indicator =>
+      taskLower.includes(indicator)).length / complexityIndicators.length + 0.3);
+
+    // Urgency analysis
+    const urgencyIndicators = ['urgent', 'critical', 'asap', 'immediate', 'emergency'];
+    analysis.urgency = Math.min(1.0, urgencyIndicators.filter(indicator =>
+      taskLower.includes(indicator)).length / urgencyIndicators.length + 0.2);
+
+    // Skill requirements
+    if (taskLower.includes('security')) analysis.requiredSkills.push('security');
+    if (taskLower.includes('performance')) analysis.requiredSkills.push('performance');
+    if (taskLower.includes('test')) analysis.requiredSkills.push('testing');
+    if (taskLower.includes('ui') || taskLower.includes('ux')) analysis.requiredSkills.push('ui_ux');
+    if (taskLower.includes('database')) analysis.requiredSkills.push('database');
+
+    // Adjust duration based on complexity and urgency
+    analysis.estimatedDuration = Math.round(30 * (1 + analysis.complexity) * (1 + analysis.urgency * 0.5));
+
+    // Risk assessment
+    if (analysis.complexity > 0.7 || analysis.urgency > 0.8) {
+      analysis.riskLevel = 'high';
+    } else if (analysis.complexity < 0.3 && analysis.urgency < 0.3) {
+      analysis.riskLevel = 'low';
+    }
+
+    return analysis;
+  }
+
+  scoreAgents(availableAgents, taskAnalysis) {
+    const scoredAgents = availableAgents.map(agentId => {
+      const agent = this.getAgentById(agentId);
+      if (!agent) return { id: agentId, score: 0 };
+
+      let score = 0;
+
+      // Skill matching (40% of score)
+      const skillMatch = this.calculateSkillMatch(agent.expertise || [], taskAnalysis.requiredSkills);
+      score += skillMatch * 0.4;
+
+      // Availability (30% of score)
+      const availability = (agent.availability || 1.0) * (1 - (agent.workload || 0));
+      score += availability * 0.3;
+
+      // Performance history (20% of score)
+      score += (agent.performanceScore || 0.7) * 0.2;
+
+      // Workload balance (10% of score)
+      const currentWorkload = this.workloadTracking.get(agentId) || 0;
+      const workloadScore = Math.max(0, 1 - currentWorkload / 5); // Penalize high workload
+      score += workloadScore * 0.1;
+
+      return { id: agentId, agent, score };
+    });
+
+    return scoredAgents
+      .filter(a => a.score > 0)
+      .sort((a, b) => b.score - a.score);
+  }
+
+  calculateSkillMatch(agentSkills, requiredSkills) {
+    if (requiredSkills.length === 0) return 0.5; // Neutral if no specific requirements
+
+    const matches = requiredSkills.filter(required =>
+      agentSkills.some(skill =>
+        skill.toLowerCase().includes(required.toLowerCase()) ||
+        required.toLowerCase().includes(skill.toLowerCase())
+      )
+    );
+
+    return matches.length / requiredSkills.length;
+  }
+
+  breakdownTask(task, analysis) {
+    const breakdown = [];
+
+    // Basic task breakdown based on complexity
+    if (analysis.complexity > 0.7) {
+      breakdown.push('Requirements analysis and planning');
+      breakdown.push('Architecture and design phase');
+      breakdown.push('Implementation phase');
+      breakdown.push('Testing and validation');
+      breakdown.push('Documentation and review');
+    } else if (analysis.complexity > 0.4) {
+      breakdown.push('Analysis and planning');
+      breakdown.push('Implementation');
+      breakdown.push('Testing and review');
+    } else {
+      breakdown.push('Quick analysis');
+      breakdown.push('Direct implementation');
+    }
+
+    return breakdown;
+  }
+
+  updateWorkloadTracking(delegation) {
+    // Increase workload for assigned agents
+    if (delegation.primaryAgent) {
+      const current = this.workloadTracking.get(delegation.primaryAgent) || 0;
+      this.workloadTracking.set(delegation.primaryAgent, current + 1);
+    }
+
+    delegation.supportingAgents.forEach(agentId => {
+      const current = this.workloadTracking.get(agentId) || 0;
+      this.workloadTracking.set(agentId, current + 0.5);
+    });
+  }
+
+  getAgentById(agentId) {
+    // This would typically reference the main agent registry
+    // For now, return a placeholder
+    return {
+      id: agentId,
+      expertise: [],
+      availability: 1.0,
+      workload: 0,
+      performanceScore: 0.7
+    };
+  }
+
+  getDelegationHistory() {
+    return this.delegationHistory;
+  }
+
+  getWorkloadStatus() {
+    return Object.fromEntries(this.workloadTracking);
+  }
+}
+
+class DynamicAgentFactory {
+  constructor() {
+    this.createdAgents = new Map();
+    this.agentTemplates = new Map();
+    this.initializeTemplates();
+  }
+
+  async initialize() {
+    console.log(chalk.blue('🏭 Dynamic Agent Factory initialized'));
+  }
+
+  initializeTemplates() {
+    this.agentTemplates.set('senior_dev', {
+      personality: 'Experienced, architectural thinking, best practices focused',
+      communicationStyle: 'technical_and_mentoring',
+      baseExpertise: ['system design', 'code review', 'architecture'],
+      baseCapabilities: ['code_analysis', 'architecture_review', 'mentoring']
+    });
+
+    this.agentTemplates.set('security_expert', {
+      personality: 'Security-first mindset, thorough, risk-aware',
+      communicationStyle: 'detailed_and_cautious',
+      baseExpertise: ['security analysis', 'threat modeling', 'compliance'],
+      baseCapabilities: ['security_audit', 'vulnerability_assessment', 'compliance_check']
+    });
+
+    this.agentTemplates.set('performance_expert', {
+      personality: 'Optimization-focused, data-driven, efficiency-minded',
+      communicationStyle: 'analytical_and_precise',
+      baseExpertise: ['performance optimization', 'profiling', 'scalability'],
+      baseCapabilities: ['performance_analysis', 'bottleneck_identification', 'optimization']
+    });
+
+    this.agentTemplates.set('tester', {
+      personality: 'Detail-oriented, thorough, edge-case focused',
+      communicationStyle: 'methodical_and_detailed',
+      baseExpertise: ['testing strategies', 'quality assurance', 'automation'],
+      baseCapabilities: ['test_design', 'automation_setup', 'quality_metrics']
+    });
+
+    this.agentTemplates.set('doc_writer', {
+      personality: 'Clear communicator, user-focused, comprehensive',
+      communicationStyle: 'clear_and_comprehensive',
+      baseExpertise: ['technical writing', 'documentation', 'communication'],
+      baseCapabilities: ['documentation_writing', 'api_docs', 'user_guides']
+    });
+  }
+
+  async createAgent({ id, requirements, baseTemplate = 'senior_dev', customizations = {} }) {
+    const template = this.agentTemplates.get(baseTemplate) || this.agentTemplates.get('senior_dev');
+
+    const agent = {
+      id,
+      role: this.generateRole(requirements, customizations.role),
+      personality: customizations.personality || template.personality,
+      expertise: this.generateExpertise(requirements, template.baseExpertise),
+      capabilities: this.generateCapabilities(requirements, template.baseCapabilities),
+      communicationStyle: customizations.communicationStyle || template.communicationStyle,
+      workload: 0,
+      availability: 1.0,
+      performanceScore: 0.7, // Start with neutral score
+      systemPrompt: this.generateSystemPrompt(requirements, customizations),
+      emoji: this.selectEmoji(requirements),
+      createdAt: new Date(),
+      specialization: this.extractSpecialization(requirements),
+      dynamicallyCreated: true
+    };
+
+    // Store the created agent
+    this.createdAgents.set(id, {
+      agent,
+      requirements,
+      baseTemplate,
+      customizations,
+      creationTime: new Date()
+    });
+
+    console.log(chalk.green(`🤖 Created dynamic agent: ${agent.role} (${agent.specialization})`));
+
+    return agent;
+  }
+
+  generateRole(requirements, customRole) {
+    if (customRole) return customRole;
+
+    const reqLower = requirements.toLowerCase();
+
+    if (reqLower.includes('security') && reqLower.includes('audit')) return 'Security Auditor';
+    if (reqLower.includes('security')) return 'Security Specialist';
+    if (reqLower.includes('performance') && reqLower.includes('database')) return 'Database Performance Expert';
+    if (reqLower.includes('performance')) return 'Performance Optimization Expert';
+    if (reqLower.includes('ui') && reqLower.includes('accessibility')) return 'Accessibility Expert';
+    if (reqLower.includes('ui') || reqLower.includes('ux')) return 'UI/UX Specialist';
+    if (reqLower.includes('api') && reqLower.includes('design')) return 'API Design Expert';
+    if (reqLower.includes('data') && reqLower.includes('analysis')) return 'Data Analysis Expert';
+    if (reqLower.includes('machine learning') || reqLower.includes('ml')) return 'ML Engineering Expert';
+    if (reqLower.includes('devops') || reqLower.includes('infrastructure')) return 'DevOps Specialist';
+    if (reqLower.includes('mobile')) return 'Mobile Development Expert';
+    if (reqLower.includes('blockchain')) return 'Blockchain Developer';
+    if (reqLower.includes('cloud')) return 'Cloud Architecture Expert';
+
+    return 'Specialized Developer';
+  }
+
+  generateExpertise(requirements, baseExpertise) {
+    const expertise = [...baseExpertise];
+    const reqLower = requirements.toLowerCase();
+
+    // Add domain-specific expertise
+    if (reqLower.includes('react') || reqLower.includes('frontend')) expertise.push('React development', 'frontend architecture');
+    if (reqLower.includes('node') || reqLower.includes('backend')) expertise.push('Node.js', 'backend systems');
+    if (reqLower.includes('database') || reqLower.includes('sql')) expertise.push('database design', 'SQL optimization');
+    if (reqLower.includes('aws') || reqLower.includes('cloud')) expertise.push('cloud platforms', 'AWS services');
+    if (reqLower.includes('docker') || reqLower.includes('kubernetes')) expertise.push('containerization', 'orchestration');
+    if (reqLower.includes('microservices')) expertise.push('microservices architecture', 'distributed systems');
+    if (reqLower.includes('graphql')) expertise.push('GraphQL', 'API design');
+    if (reqLower.includes('typescript')) expertise.push('TypeScript', 'type systems');
+    if (reqLower.includes('python')) expertise.push('Python development', 'data processing');
+    if (reqLower.includes('machine learning')) expertise.push('ML algorithms', 'model training');
+
+    return [...new Set(expertise)]; // Remove duplicates
+  }
+
+  generateCapabilities(requirements, baseCapabilities) {
+    const capabilities = [...baseCapabilities];
+    const reqLower = requirements.toLowerCase();
+
+    // Add specific capabilities based on requirements
+    if (reqLower.includes('audit')) capabilities.push('security_audit', 'compliance_check');
+    if (reqLower.includes('optimization')) capabilities.push('performance_optimization', 'code_optimization');
+    if (reqLower.includes('testing')) capabilities.push('test_automation', 'integration_testing');
+    if (reqLower.includes('deployment')) capabilities.push('ci_cd_setup', 'deployment_automation');
+    if (reqLower.includes('monitoring')) capabilities.push('system_monitoring', 'alerting_setup');
+    if (reqLower.includes('documentation')) capabilities.push('technical_writing', 'api_documentation');
+    if (reqLower.includes('review')) capabilities.push('code_review', 'architecture_review');
+    if (reqLower.includes('migration')) capabilities.push('data_migration', 'system_migration');
+    if (reqLower.includes('integration')) capabilities.push('system_integration', 'api_integration');
+
+    return [...new Set(capabilities)]; // Remove duplicates
+  }
+
+  generateSystemPrompt(requirements, customizations) {
+    const basePrompt = customizations.systemPrompt ||
+      `You are a specialized AI agent created to handle: ${requirements}`;
+
+    const additionalContext = `
+
+Your primary focus areas include:
+- Providing expert-level insights and recommendations
+- Collaborating effectively with other team members
+- Maintaining high standards of quality and best practices
+- Being thorough, practical, and solution-oriented
+- Communicating clearly and professionally
+
+When working on tasks:
+1. Analyze requirements carefully
+2. Consider multiple approaches and trade-offs
+3. Provide specific, actionable recommendations
+4. Highlight potential risks or challenges
+5. Suggest concrete next steps
+
+Always maintain your specialized perspective while being collaborative and open to other viewpoints.`;
+
+    return basePrompt + additionalContext;
+  }
+
+  selectEmoji(requirements) {
+    const reqLower = requirements.toLowerCase();
+
+    if (reqLower.includes('security')) return '🔒';
+    if (reqLower.includes('performance')) return '⚡';
+    if (reqLower.includes('test')) return '🧪';
+    if (reqLower.includes('ui') || reqLower.includes('design')) return '🎨';
+    if (reqLower.includes('data')) return '📊';
+    if (reqLower.includes('api')) return '🔌';
+    if (reqLower.includes('mobile')) return '📱';
+    if (reqLower.includes('cloud')) return '☁️';
+    if (reqLower.includes('database')) return '🗄️';
+    if (reqLower.includes('machine learning')) return '🤖';
+    if (reqLower.includes('devops')) return '🚀';
+    if (reqLower.includes('blockchain')) return '⛓️';
+
+    return '🔧'; // Default tool emoji
+  }
+
+  extractSpecialization(requirements) {
+    const reqLower = requirements.toLowerCase();
+
+    if (reqLower.includes('security')) return 'Security';
+    if (reqLower.includes('performance')) return 'Performance';
+    if (reqLower.includes('ui') || reqLower.includes('ux')) return 'UI/UX';
+    if (reqLower.includes('data')) return 'Data';
+    if (reqLower.includes('api')) return 'API';
+    if (reqLower.includes('mobile')) return 'Mobile';
+    if (reqLower.includes('cloud')) return 'Cloud';
+    if (reqLower.includes('devops')) return 'DevOps';
+    if (reqLower.includes('machine learning')) return 'ML';
+
+    return 'General';
+  }
+
+  getCreatedAgents() {
+    return Array.from(this.createdAgents.entries()).map(([id, data]) => ({
+      id,
+      role: data.agent.role,
+      specialization: data.agent.specialization,
+      createdAt: data.creationTime,
+      requirements: data.requirements
+    }));
+  }
+
+  removeAgent(agentId) {
+    const removed = this.createdAgents.delete(agentId);
+    if (removed) {
+      console.log(chalk.yellow(`🗑️ Removed dynamic agent: ${agentId}`));
+    }
+    return removed;
+  }
+
+  getAgentStats() {
+    const agents = Array.from(this.createdAgents.values());
+    const specializations = {};
+
+    agents.forEach(({ agent }) => {
+      specializations[agent.specialization] = (specializations[agent.specialization] || 0) + 1;
+    });
+
+    return {
+      totalCreated: agents.length,
+      specializations,
+      averagePerformance: agents.reduce((sum, { agent }) => sum + agent.performanceScore, 0) / agents.length || 0
+    };
   }
 }
