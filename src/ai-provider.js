@@ -31,13 +31,19 @@ export class AIProvider {
   initializeProvider() {
     switch (this.config.provider) {
       case 'openai':
+        if (!process.env.OPENAI_API_KEY) {
+          throw new Error('OPENAI_API_KEY environment variable is required');
+        }
         this.client = new OpenAI({
-          apiKey: process.env.OPENAI_API_KEY || 'test-key-for-testing'
+          apiKey: process.env.OPENAI_API_KEY
         });
         break;
       case 'anthropic':
+        if (!process.env.ANTHROPIC_API_KEY) {
+          throw new Error('ANTHROPIC_API_KEY environment variable is required');
+        }
         this.client = new Anthropic({
-          apiKey: process.env.ANTHROPIC_API_KEY || 'test-key-for-testing'
+          apiKey: process.env.ANTHROPIC_API_KEY
         });
         break;
       case 'ollama':
@@ -747,8 +753,12 @@ Provide 3-5 most relevant suggestions.`;
 
   async testOpenAIConnection() {
     try {
+      if (!process.env.OPENAI_API_KEY) {
+        return false;
+      }
+
       const testClient = new OpenAI({
-        apiKey: process.env.OPENAI_API_KEY || 'test-key'
+        apiKey: process.env.OPENAI_API_KEY
       });
       // Just check if we can make a request (will fail with invalid key but show connection)
       await testClient.chat.completions.create({
@@ -768,8 +778,12 @@ Provide 3-5 most relevant suggestions.`;
 
   async testAnthropicConnection() {
     try {
+      if (!process.env.ANTHROPIC_API_KEY) {
+        return false;
+      }
+
       const testClient = new Anthropic({
-        apiKey: process.env.ANTHROPIC_API_KEY || 'test-key'
+        apiKey: process.env.ANTHROPIC_API_KEY
       });
       await testClient.messages.create({
         model: 'claude-3-haiku-20240307',

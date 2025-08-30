@@ -1,0 +1,76 @@
+{
+  "timestamp": "2025-08-30T09:51:19.951Z",
+  "systemState": "failed",
+  "components": {
+    "errorSystem": {
+      "status": "registered",
+      "failureCount": 0,
+      "startTime": null
+    },
+    "integrationManager": {
+      "status": "registered",
+      "failureCount": 0,
+      "startTime": null
+    },
+    "testFramework": {
+      "status": "registered",
+      "failureCount": 0,
+      "startTime": null
+    },
+    "mlSecurity": {
+      "status": "registered",
+      "failureCount": 0,
+      "startTime": null
+    },
+    "zeroTrust": {
+      "status": "registered",
+      "failureCount": 0,
+      "startTime": null
+    },
+    "licenseSystem": {
+      "status": "registered",
+      "failureCount": 0,
+      "startTime": null
+    }
+  },
+  "healthStatus": {},
+  "metrics": {
+    "timestamp": "2025-08-30T09:51:19.952Z",
+    "uptime": 316,
+    "memory": {
+      "heapUsed": 11621896,
+      "heapTotal": 16523264,
+      "external": 2501741,
+      "rss": 71639040
+    },
+    "cpu": {
+      "user": 1474438,
+      "system": 147138
+    },
+    "counters": {
+      "system.requests.total": 0,
+      "system.errors.total": 0,
+      "system.recoveries.total": 0
+    },
+    "gauges": {
+      "system.components.running": 0,
+      "system.components.failed": 0,
+      "system.memory.usage": 0,
+      "system.cpu.usage": 0
+    },
+    "histograms": {
+      "system.response.time": {
+        "count": 0,
+        "min": 0,
+        "max": 0,
+        "avg": 0
+      },
+      "system.component.startup.time": {
+        "count": 0,
+        "min": 0,
+        "max": 0,
+        "avg": 0
+      }
+    }
+  }
+}

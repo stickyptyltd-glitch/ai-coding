@@ -1,0 +1,2039 @@
+{
+  "timestamp": "2025-08-30T09:53:35.555Z",
+  "duration": 682,
+  "summary": {
+    "totalFiles": 111,
+    "checkedFiles": 77,
+    "errors": 6,
+    "warnings": 324,
+    "suggestions": 7
+  },
+  "errors": [
+    {
+      "category": "security",
+      "title": "Potential hardcoded secret in /home/sticky/my-project1/ai-coding-agent/src/advanced-anti-tamper.js",
+      "message": "Use environment variables",
+      "type": "error"
+    },
+    {
+      "category": "security",
+      "title": "Potential hardcoded secret in /home/sticky/my-project1/ai-coding-agent/src/advanced-anti-tamper.js",
+      "message": "Use environment variables",
+      "type": "error"
+    },
+    {
+      "category": "security",
+      "title": "Potential hardcoded secret in /home/sticky/my-project1/ai-coding-agent/src/ai-provider.js",
+      "message": "Use environment variables",
+      "type": "error"
+    },
+    {
+      "category": "security",
+      "title": "Potential hardcoded secret in /home/sticky/my-project1/ai-coding-agent/test/license.test.js",
+      "message": "Use environment variables",
+      "type": "error"
+    },
+    {
+      "category": "security",
+      "title": "eval() usage in /home/sticky/my-project1/ai-coding-agent/scripts/comprehensive-error-check.js",
+      "message": "Avoid eval() for security",
+      "type": "error"
+    },
+    {
+      "category": "security",
+      "title": "eval() usage in /home/sticky/my-project1/ai-coding-agent/src/simulation-sandbox.js",
+      "message": "Avoid eval() for security",
+      "type": "error"
+    }
+  ],
+  "warnings": [
+    {
+      "category": "quality",
+      "title": "TODO/FIXME found in /home/sticky/my-project1/ai-coding-agent/scripts/comprehensive-error-check.js",
+      "message": "Address pending items",
+      "type": "warning"
+    },
+    {
+      "category": "style",
+      "title": "Long line in /home/sticky/my-project1/ai-coding-agent/scripts/comprehensive-error-check.js:681",
+      "message": "Consider breaking long lines",
+      "type": "warning"
+    },
+    {
+      "category": "style",
+      "title": "Long line in /home/sticky/my-project1/ai-coding-agent/scripts/gh-actions.js:37",
+      "message": "Consider breaking long lines",
+      "type": "warning"
+    },
+    {
+      "category": "style",
+      "title": "Long line in /home/sticky/my-project1/ai-coding-agent/scripts/gh-dispatch.js:20",
+      "message": "Consider breaking long lines",
+      "type": "warning"
+    },
+    {
+      "category": "style",
+      "title": "Long line in /home/sticky/my-project1/ai-coding-agent/scripts/gh-dispatch.js:49",
+      "message": "Consider breaking long lines",
+      "type": "warning"
+    },
+    {
+      "category": "style",
+      "title": "Long line in /home/sticky/my-project1/ai-coding-agent/scripts/new-adr.js:20",
+      "message": "Consider breaking long lines",
+      "type": "warning"
+    },
+    {
+      "category": "style",
+      "title": "Long line in /home/sticky/my-project1/ai-coding-agent/scripts/rotate-license.js:29",
+      "message": "Consider breaking long lines",
+      "type": "warning"
+    },
+    {
+      "category": "style",
+      "title": "Long line in /home/sticky/my-project1/ai-coding-agent/scripts/sign-license.js:19",
+      "message": "Consider breaking long lines",
+      "type": "warning"
+    },
+    {
+      "category": "quality",
+      "title": "Console.log found in /home/sticky/my-project1/ai-coding-agent/src/adaptive-style.js",
+      "message": "Remove debug statements",
+      "type": "warning"
+    },
+    {
+      "category": "style",
+      "title": "Long line in /home/sticky/my-project1/ai-coding-agent/src/adaptive-style.js:47",
+      "message": "Consider breaking long lines",
+      "type": "warning"
+    },
+    {
+      "category": "style",
+      "title": "Long line in /home/sticky/my-project1/ai-coding-agent/src/adaptive-style.js:82",
+      "message": "Consider breaking long lines",
+      "type": "warning"
+    },
+    {
+      "category": "style",
+      "title": "Long line in /home/sticky/my-project1/ai-coding-agent/src/adaptive-style.js:101",
+      "message": "Consider breaking long lines",
+      "type": "warning"
+    },
+    {
+      "category": "quality",
+      "title": "Console.log found in /home/sticky/my-project1/ai-coding-agent/src/advanced-anti-tamper.js",
+      "message": "Remove debug statements",
+      "type": "warning"
+    },
+    {
+      "category": "style",
+      "title": "Long line in /home/sticky/my-project1/ai-coding-agent/src/advanced-anti-tamper.js:429",
+      "message": "Consider breaking long lines",
+      "type": "warning"
+    },
+    {
+      "category": "quality",
+      "title": "Console.log found in /home/sticky/my-project1/ai-coding-agent/src/advanced-license.js",
+      "message": "Remove debug statements",
+      "type": "warning"
+    },
+    {
+      "category": "quality",
+      "title": "Console.log found in /home/sticky/my-project1/ai-coding-agent/src/agent.js",
+      "message": "Remove debug statements",
+      "type": "warning"
+    },
+    {
+      "category": "style",
+      "title": "Long line in /home/sticky/my-project1/ai-coding-agent/src/agent.js:147",
+      "message": "Consider breaking long lines",
+      "type": "warning"
+    },
+    {
+      "category": "style",
+      "title": "Long line in /home/sticky/my-project1/ai-coding-agent/src/agent.js:255",
+      "message": "Consider breaking long lines",
+      "type": "warning"
+    },
+    {
+      "category": "style",
+      "title": "Long line in /home/sticky/my-project1/ai-coding-agent/src/agent.js:273",
+      "message": "Consider breaking long lines",
+      "type": "warning"
+    },
+    {
+      "category": "style",
+      "title": "Long line in /home/sticky/my-project1/ai-coding-agent/src/agent.js:886",
+      "message": "Consider breaking long lines",
+      "type": "warning"
+    },
+    {
+      "category": "style",
+      "title": "Long line in /home/sticky/my-project1/ai-coding-agent/src/agent.js:920",
+      "message": "Consider breaking long lines",
+      "type": "warning"
+    },
+    {
+      "category": "style",
+      "title": "Long line in /home/sticky/my-project1/ai-coding-agent/src/agent.js:1279",
+      "message": "Consider breaking long lines",
+      "type": "warning"
+    },
+    {
+      "category": "style",
+      "title": "Long line in /home/sticky/my-project1/ai-coding-agent/src/agent.js:1417",
+      "message": "Consider breaking long lines",
+      "type": "warning"
+    },
+    {
+      "category": "quality",
+      "title": "Console.log found in /home/sticky/my-project1/ai-coding-agent/src/ai-orchestration.js",
+      "message": "Remove debug statements",
+      "type": "warning"
+    },
+    {
+      "category": "style",
+      "title": "Long line in /home/sticky/my-project1/ai-coding-agent/src/ai-provider.js:179",
+      "message": "Consider breaking long lines",
+      "type": "warning"
+    },
+    {
+      "category": "style",
+      "title": "Long line in /home/sticky/my-project1/ai-coding-agent/src/ai-provider.js:181",
+      "message": "Consider breaking long lines",
+      "type": "warning"
+    },
+    {
+      "category": "style",
+      "title": "Long line in /home/sticky/my-project1/ai-coding-agent/src/ai-provider.js:183",
+      "message": "Consider breaking long lines",
+      "type": "warning"
+    },
+    {
+      "category": "style",
+      "title": "Long line in /home/sticky/my-project1/ai-coding-agent/src/ai-provider.js:185",
+      "message": "Consider breaking long lines",
+      "type": "warning"
+    },
+    {
+      "category": "style",
+      "title": "Long line in /home/sticky/my-project1/ai-coding-agent/src/ai-provider.js:187",
+      "message": "Consider breaking long lines",
+      "type": "warning"
+    },
+    {
+      "category": "style",
+      "title": "Long line in /home/sticky/my-project1/ai-coding-agent/src/ai-provider.js:189",
+      "message": "Consider breaking long lines",
+      "type": "warning"
+    },
+    {
+      "category": "style",
+      "title": "Long line in /home/sticky/my-project1/ai-coding-agent/src/ai-provider.js:200",
+      "message": "Consider breaking long lines",
+      "type": "warning"
+    },
+    {
+      "category": "style",
+      "title": "Long line in /home/sticky/my-project1/ai-coding-agent/src/ai-provider.js:245",
+      "message": "Consider breaking long lines",
+      "type": "warning"
+    },
+    {
+      "category": "style",
+      "title": "Long line in /home/sticky/my-project1/ai-coding-agent/src/ai-provider.js:269",
+      "message": "Consider breaking long lines",
+      "type": "warning"
+    },
+    {
+      "category": "quality",
+      "title": "Console.log found in /home/sticky/my-project1/ai-coding-agent/src/anti-tamper.js",
+      "message": "Remove debug statements",
+      "type": "warning"
+    },
+    {
+      "category": "quality",
+      "title": "Console.log found in /home/sticky/my-project1/ai-coding-agent/src/blockchain-audit.js",
+      "message": "Remove debug statements",
+      "type": "warning"
+    },
+    {
+      "category": "quality",
+      "title": "Console.log found in /home/sticky/my-project1/ai-coding-agent/src/cli.js",
+      "message": "Remove debug statements",
+      "type": "warning"
+    },
+    {
+      "category": "quality",
+      "title": "Console.log found in /home/sticky/my-project1/ai-coding-agent/src/code-analyzer.js",
+      "message": "Remove debug statements",
+      "type": "warning"
+    },
+    {
+      "category": "quality",
+      "title": "TODO/FIXME found in /home/sticky/my-project1/ai-coding-agent/src/code-analyzer.js",
+      "message": "Address pending items",
+      "type": "warning"
+    },
+    {
+      "category": "style",
+      "title": "Long line in /home/sticky/my-project1/ai-coding-agent/src/code-analyzer.js:96",
+      "message": "Consider breaking long lines",
+      "type": "warning"
+    },
+    {
+      "category": "quality",
+      "title": "TODO/FIXME found in /home/sticky/my-project1/ai-coding-agent/src/command-parser.js",
+      "message": "Address pending items",
+      "type": "warning"
+    },
+    {
+      "category": "quality",
+      "title": "Console.log found in /home/sticky/my-project1/ai-coding-agent/src/config-manager.js",
+      "message": "Remove debug statements",
+      "type": "warning"
+    },
+    {
+      "category": "style",
+      "title": "Long line in /home/sticky/my-project1/ai-coding-agent/src/config-manager.js:211",
+      "message": "Consider breaking long lines",
+      "type": "warning"
+    },
+    {
+      "category": "style",
+      "title": "Long line in /home/sticky/my-project1/ai-coding-agent/src/config-manager.js:227",
+      "message": "Consider breaking long lines",
+      "type": "warning"
+    },
+    {
+      "category": "style",
+      "title": "Long line in /home/sticky/my-project1/ai-coding-agent/src/config-manager.js:233",
+      "message": "Consider breaking long lines",
+      "type": "warning"
+    },
+    {
+      "category": "style",
+      "title": "Long line in /home/sticky/my-project1/ai-coding-agent/src/config-manager.js:234",
+      "message": "Consider breaking long lines",
+      "type": "warning"
+    },
+    {
+      "category": "quality",
+      "title": "Console.log found in /home/sticky/my-project1/ai-coding-agent/src/context-search.js",
+      "message": "Remove debug statements",
+      "type": "warning"
+    },
+    {
+      "category": "style",
+      "title": "Long line in /home/sticky/my-project1/ai-coding-agent/src/context-search.js:137",
+      "message": "Consider breaking long lines",
+      "type": "warning"
+    },
+    {
+      "category": "style",
+      "title": "Long line in /home/sticky/my-project1/ai-coding-agent/src/context-search.js:178",
+      "message": "Consider breaking long lines",
+      "type": "warning"
+    },
+    {
+      "category": "quality",
+      "title": "Console.log found in /home/sticky/my-project1/ai-coding-agent/src/enhanced-error-system.js",
+      "message": "Remove debug statements",
+      "type": "warning"
+    },
+    {
+      "category": "style",
+      "title": "Long line in /home/sticky/my-project1/ai-coding-agent/src/enhanced-error-system.js:1192",
+      "message": "Consider breaking long lines",
+      "type": "warning"
+    },
+    {
+      "category": "quality",
+      "title": "Console.log found in /home/sticky/my-project1/ai-coding-agent/src/enterprise-agent.js",
+      "message": "Remove debug statements",
+      "type": "warning"
+    },
+    {
+      "category": "style",
+      "title": "Long line in /home/sticky/my-project1/ai-coding-agent/src/enterprise-agent.js:184",
+      "message": "Consider breaking long lines",
+      "type": "warning"
+    },
+    {
+      "category": "style",
+      "title": "Long line in /home/sticky/my-project1/ai-coding-agent/src/enterprise-agent.js:2877",
+      "message": "Consider breaking long lines",
+      "type": "warning"
+    },
+    {
+      "category": "style",
+      "title": "Long line in /home/sticky/my-project1/ai-coding-agent/src/enterprise-agent.js:2918",
+      "message": "Consider breaking long lines",
+      "type": "warning"
+    },
+    {
+      "category": "style",
+      "title": "Long line in /home/sticky/my-project1/ai-coding-agent/src/enterprise-agent.js:3091",
+      "message": "Consider breaking long lines",
+      "type": "warning"
+    },
+    {
+      "category": "style",
+      "title": "Long line in /home/sticky/my-project1/ai-coding-agent/src/enterprise-agent.js:3191",
+      "message": "Consider breaking long lines",
+      "type": "warning"
+    },
+    {
+      "category": "style",
+      "title": "Long line in /home/sticky/my-project1/ai-coding-agent/src/enterprise-agent.js:3220",
+      "message": "Consider breaking long lines",
+      "type": "warning"
+    },
+    {
+      "category": "quality",
+      "title": "Console.log found in /home/sticky/my-project1/ai-coding-agent/src/error-healing.js",
+      "message": "Remove debug statements",
+      "type": "warning"
+    },
+    {
+      "category": "quality",
+      "title": "Console.log found in /home/sticky/my-project1/ai-coding-agent/src/error-validation-system.js",
+      "message": "Remove debug statements",
+      "type": "warning"
+    },
+    {
+      "category": "quality",
+      "title": "Console.log found in /home/sticky/my-project1/ai-coding-agent/src/facial-recognition.js",
+      "message": "Remove debug statements",
+      "type": "warning"
+    },
+    {
+      "category": "quality",
+      "title": "Console.log found in /home/sticky/my-project1/ai-coding-agent/src/goal-planner.js",
+      "message": "Remove debug statements",
+      "type": "warning"
+    },
+    {
+      "category": "quality",
+      "title": "Console.log found in /home/sticky/my-project1/ai-coding-agent/src/integration-manager.js",
+      "message": "Remove debug statements",
+      "type": "warning"
+    },
+    {
+      "category": "quality",
+      "title": "Console.log found in /home/sticky/my-project1/ai-coding-agent/src/integrations/base-integration.js",
+      "message": "Remove debug statements",
+      "type": "warning"
+    },
+    {
+      "category": "quality",
+      "title": "Console.log found in /home/sticky/my-project1/ai-coding-agent/src/ip-protection.js",
+      "message": "Remove debug statements",
+      "type": "warning"
+    },
+    {
+      "category": "quality",
+      "title": "Console.log found in /home/sticky/my-project1/ai-coding-agent/src/license.js",
+      "message": "Remove debug statements",
+      "type": "warning"
+    },
+    {
+      "category": "quality",
+      "title": "Console.log found in /home/sticky/my-project1/ai-coding-agent/src/local-voice-recognition.js",
+      "message": "Remove debug statements",
+      "type": "warning"
+    },
+    {
+      "category": "quality",
+      "title": "Console.log found in /home/sticky/my-project1/ai-coding-agent/src/logger.js",
+      "message": "Remove debug statements",
+      "type": "warning"
+    },
+    {
+      "category": "quality",
+      "title": "Console.log found in /home/sticky/my-project1/ai-coding-agent/src/memory.js",
+      "message": "Remove debug statements",
+      "type": "warning"
+    },
+    {
+      "category": "style",
+      "title": "Long line in /home/sticky/my-project1/ai-coding-agent/src/memory.js:130",
+      "message": "Consider breaking long lines",
+      "type": "warning"
+    },
+    {
+      "category": "style",
+      "title": "Long line in /home/sticky/my-project1/ai-coding-agent/src/memory.js:281",
+      "message": "Consider breaking long lines",
+      "type": "warning"
+    },
+    {
+      "category": "style",
+      "title": "Long line in /home/sticky/my-project1/ai-coding-agent/src/metrics.js:11",
+      "message": "Consider breaking long lines",
+      "type": "warning"
+    },
+    {
+      "category": "style",
+      "title": "Long line in /home/sticky/my-project1/ai-coding-agent/src/metrics.js:12",
+      "message": "Consider breaking long lines",
+      "type": "warning"
+    },
+    {
+      "category": "style",
+      "title": "Long line in /home/sticky/my-project1/ai-coding-agent/src/metrics.js:13",
+      "message": "Consider breaking long lines",
+      "type": "warning"
+    },
+    {
+      "category": "quality",
+      "title": "Console.log found in /home/sticky/my-project1/ai-coding-agent/src/ml-security.js",
+      "message": "Remove debug statements",
+      "type": "warning"
+    },
+    {
+      "category": "quality",
+      "title": "Console.log found in /home/sticky/my-project1/ai-coding-agent/src/monitoring-system.js",
+      "message": "Remove debug statements",
+      "type": "warning"
+    },
+    {
+      "category": "style",
+      "title": "Long line in /home/sticky/my-project1/ai-coding-agent/src/monitoring-system.js:119",
+      "message": "Consider breaking long lines",
+      "type": "warning"
+    },
+    {
+      "category": "quality",
+      "title": "Console.log found in /home/sticky/my-project1/ai-coding-agent/src/multi-agent.js",
+      "message": "Remove debug statements",
+      "type": "warning"
+    },
+    {
+      "category": "style",
+      "title": "Long line in /home/sticky/my-project1/ai-coding-agent/src/multi-agent.js:835",
+      "message": "Consider breaking long lines",
+      "type": "warning"
+    },
+    {
+      "category": "style",
+      "title": "Long line in /home/sticky/my-project1/ai-coding-agent/src/multi-agent.js:1156",
+      "message": "Consider breaking long lines",
+      "type": "warning"
+    },
+    {
+      "category": "style",
+      "title": "Long line in /home/sticky/my-project1/ai-coding-agent/src/multi-agent.js:1475",
+      "message": "Consider breaking long lines",
+      "type": "warning"
+    },
+    {
+      "category": "style",
+      "title": "Long line in /home/sticky/my-project1/ai-coding-agent/src/multi-agent.js:1477",
+      "message": "Consider breaking long lines",
+      "type": "warning"
+    },
+    {
+      "category": "style",
+      "title": "Long line in /home/sticky/my-project1/ai-coding-agent/src/multi-agent.js:1479",
+      "message": "Consider breaking long lines",
+      "type": "warning"
+    },
+    {
+      "category": "quality",
+      "title": "Console.log found in /home/sticky/my-project1/ai-coding-agent/src/negotiator-agent.js",
+      "message": "Remove debug statements",
+      "type": "warning"
+    },
+    {
+      "category": "style",
+      "title": "Long line in /home/sticky/my-project1/ai-coding-agent/src/policy.js:4",
+      "message": "Consider breaking long lines",
+      "type": "warning"
+    },
+    {
+      "category": "quality",
+      "title": "Console.log found in /home/sticky/my-project1/ai-coding-agent/src/predictive-helper.js",
+      "message": "Remove debug statements",
+      "type": "warning"
+    },
+    {
+      "category": "style",
+      "title": "Long line in /home/sticky/my-project1/ai-coding-agent/src/predictive-helper.js:682",
+      "message": "Consider breaking long lines",
+      "type": "warning"
+    },
+    {
+      "category": "quality",
+      "title": "Console.log found in /home/sticky/my-project1/ai-coding-agent/src/quantum-crypto.js",
+      "message": "Remove debug statements",
+      "type": "warning"
+    },
+    {
+      "category": "style",
+      "title": "Long line in /home/sticky/my-project1/ai-coding-agent/src/quantum-crypto.js:379",
+      "message": "Consider breaking long lines",
+      "type": "warning"
+    },
+    {
+      "category": "quality",
+      "title": "Console.log found in /home/sticky/my-project1/ai-coding-agent/src/recognition-app.js",
+      "message": "Remove debug statements",
+      "type": "warning"
+    },
+    {
+      "category": "quality",
+      "title": "Console.log found in /home/sticky/my-project1/ai-coding-agent/src/refactoring-optimizer.js",
+      "message": "Remove debug statements",
+      "type": "warning"
+    },
+    {
+      "category": "style",
+      "title": "Long line in /home/sticky/my-project1/ai-coding-agent/src/refactoring-optimizer.js:357",
+      "message": "Consider breaking long lines",
+      "type": "warning"
+    },
+    {
+      "category": "quality",
+      "title": "Console.log found in /home/sticky/my-project1/ai-coding-agent/src/security.js",
+      "message": "Remove debug statements",
+      "type": "warning"
+    },
+    {
+      "category": "style",
+      "title": "Long line in /home/sticky/my-project1/ai-coding-agent/src/security.js:841",
+      "message": "Consider breaking long lines",
+      "type": "warning"
+    },
+    {
+      "category": "quality",
+      "title": "Console.log found in /home/sticky/my-project1/ai-coding-agent/src/simulation-sandbox.js",
+      "message": "Remove debug statements",
+      "type": "warning"
+    },
+    {
+      "category": "quality",
+      "title": "Console.log found in /home/sticky/my-project1/ai-coding-agent/src/system-health-checker.js",
+      "message": "Remove debug statements",
+      "type": "warning"
+    },
+    {
+      "category": "style",
+      "title": "Long line in /home/sticky/my-project1/ai-coding-agent/src/system-health-checker.js:391",
+      "message": "Consider breaking long lines",
+      "type": "warning"
+    },
+    {
+      "category": "quality",
+      "title": "Console.log found in /home/sticky/my-project1/ai-coding-agent/src/system-orchestrator.js",
+      "message": "Remove debug statements",
+      "type": "warning"
+    },
+    {
+      "category": "style",
+      "title": "Long line in /home/sticky/my-project1/ai-coding-agent/src/testing/enhanced-test-framework.js:359",
+      "message": "Consider breaking long lines",
+      "type": "warning"
+    },
+    {
+      "category": "style",
+      "title": "Long line in /home/sticky/my-project1/ai-coding-agent/src/testing/enhanced-test-framework.js:646",
+      "message": "Consider breaking long lines",
+      "type": "warning"
+    },
+    {
+      "category": "style",
+      "title": "Long line in /home/sticky/my-project1/ai-coding-agent/src/testing/enhanced-test-framework.js:1044",
+      "message": "Consider breaking long lines",
+      "type": "warning"
+    },
+    {
+      "category": "quality",
+      "title": "Console.log found in /home/sticky/my-project1/ai-coding-agent/src/tool-chains.js",
+      "message": "Remove debug statements",
+      "type": "warning"
+    },
+    {
+      "category": "style",
+      "title": "Long line in /home/sticky/my-project1/ai-coding-agent/src/tool-chains.js:140",
+      "message": "Consider breaking long lines",
+      "type": "warning"
+    },
+    {
+      "category": "style",
+      "title": "Long line in /home/sticky/my-project1/ai-coding-agent/src/tool-chains.js:144",
+      "message": "Consider breaking long lines",
+      "type": "warning"
+    },
+    {
+      "category": "style",
+      "title": "Long line in /home/sticky/my-project1/ai-coding-agent/src/tool-chains.js:169",
+      "message": "Consider breaking long lines",
+      "type": "warning"
+    },
+    {
+      "category": "style",
+      "title": "Long line in /home/sticky/my-project1/ai-coding-agent/src/tool-chains.js:201",
+      "message": "Consider breaking long lines",
+      "type": "warning"
+    },
+    {
+      "category": "style",
+      "title": "Long line in /home/sticky/my-project1/ai-coding-agent/src/tool-chains.js:363",
+      "message": "Consider breaking long lines",
+      "type": "warning"
+    },
+    {
+      "category": "style",
+      "title": "Long line in /home/sticky/my-project1/ai-coding-agent/src/tool-chains.js:1158",
+      "message": "Consider breaking long lines",
+      "type": "warning"
+    },
+    {
+      "category": "style",
+      "title": "Long line in /home/sticky/my-project1/ai-coding-agent/src/tool-chains.js:1169",
+      "message": "Consider breaking long lines",
+      "type": "warning"
+    },
+    {
+      "category": "style",
+      "title": "Long line in /home/sticky/my-project1/ai-coding-agent/src/tool-chains.js:1173",
+      "message": "Consider breaking long lines",
+      "type": "warning"
+    },
+    {
+      "category": "style",
+      "title": "Long line in /home/sticky/my-project1/ai-coding-agent/src/tool-chains.js:1195",
+      "message": "Consider breaking long lines",
+      "type": "warning"
+    },
+    {
+      "category": "style",
+      "title": "Long line in /home/sticky/my-project1/ai-coding-agent/src/tool-chains.js:1207",
+      "message": "Consider breaking long lines",
+      "type": "warning"
+    },
+    {
+      "category": "style",
+      "title": "Long line in /home/sticky/my-project1/ai-coding-agent/src/tool-chains.js:1233",
+      "message": "Consider breaking long lines",
+      "type": "warning"
+    },
+    {
+      "category": "style",
+      "title": "Long line in /home/sticky/my-project1/ai-coding-agent/src/tool-chains.js:1237",
+      "message": "Consider breaking long lines",
+      "type": "warning"
+    },
+    {
+      "category": "style",
+      "title": "Long line in /home/sticky/my-project1/ai-coding-agent/src/tool-chains.js:1249",
+      "message": "Consider breaking long lines",
+      "type": "warning"
+    },
+    {
+      "category": "style",
+      "title": "Long line in /home/sticky/my-project1/ai-coding-agent/src/tool-chains.js:1262",
+      "message": "Consider breaking long lines",
+      "type": "warning"
+    },
+    {
+      "category": "style",
+      "title": "Long line in /home/sticky/my-project1/ai-coding-agent/src/tool-chains.js:1266",
+      "message": "Consider breaking long lines",
+      "type": "warning"
+    },
+    {
+      "category": "style",
+      "title": "Long line in /home/sticky/my-project1/ai-coding-agent/src/tool-chains.js:1308",
+      "message": "Consider breaking long lines",
+      "type": "warning"
+    },
+    {
+      "category": "style",
+      "title": "Long line in /home/sticky/my-project1/ai-coding-agent/src/tool-chains.js:1322",
+      "message": "Consider breaking long lines",
+      "type": "warning"
+    },
+    {
+      "category": "style",
+      "title": "Long line in /home/sticky/my-project1/ai-coding-agent/src/tool-chains.js:1334",
+      "message": "Consider breaking long lines",
+      "type": "warning"
+    },
+    {
+      "category": "style",
+      "title": "Long line in /home/sticky/my-project1/ai-coding-agent/src/tool-chains.js:1371",
+      "message": "Consider breaking long lines",
+      "type": "warning"
+    },
+    {
+      "category": "style",
+      "title": "Long line in /home/sticky/my-project1/ai-coding-agent/src/tool-chains.js:1374",
+      "message": "Consider breaking long lines",
+      "type": "warning"
+    },
+    {
+      "category": "style",
+      "title": "Long line in /home/sticky/my-project1/ai-coding-agent/src/tool-chains.js:1425",
+      "message": "Consider breaking long lines",
+      "type": "warning"
+    },
+    {
+      "category": "style",
+      "title": "Long line in /home/sticky/my-project1/ai-coding-agent/src/tool-chains.js:1467",
+      "message": "Consider breaking long lines",
+      "type": "warning"
+    },
+    {
+      "category": "style",
+      "title": "Long line in /home/sticky/my-project1/ai-coding-agent/src/tool-chains.js:1475",
+      "message": "Consider breaking long lines",
+      "type": "warning"
+    },
+    {
+      "category": "style",
+      "title": "Long line in /home/sticky/my-project1/ai-coding-agent/src/tool-chains.js:1479",
+      "message": "Consider breaking long lines",
+      "type": "warning"
+    },
+    {
+      "category": "style",
+      "title": "Long line in /home/sticky/my-project1/ai-coding-agent/src/tool-chains.js:1496",
+      "message": "Consider breaking long lines",
+      "type": "warning"
+    },
+    {
+      "category": "style",
+      "title": "Long line in /home/sticky/my-project1/ai-coding-agent/src/tool-chains.js:1501",
+      "message": "Consider breaking long lines",
+      "type": "warning"
+    },
+    {
+      "category": "style",
+      "title": "Long line in /home/sticky/my-project1/ai-coding-agent/src/tool-chains.js:1512",
+      "message": "Consider breaking long lines",
+      "type": "warning"
+    },
+    {
+      "category": "style",
+      "title": "Long line in /home/sticky/my-project1/ai-coding-agent/src/tool-chains.js:1516",
+      "message": "Consider breaking long lines",
+      "type": "warning"
+    },
+    {
+      "category": "style",
+      "title": "Long line in /home/sticky/my-project1/ai-coding-agent/src/tool-chains.js:1548",
+      "message": "Consider breaking long lines",
+      "type": "warning"
+    },
+    {
+      "category": "style",
+      "title": "Long line in /home/sticky/my-project1/ai-coding-agent/src/tool-chains.js:1560",
+      "message": "Consider breaking long lines",
+      "type": "warning"
+    },
+    {
+      "category": "style",
+      "title": "Long line in /home/sticky/my-project1/ai-coding-agent/src/tool-chains.js:1564",
+      "message": "Consider breaking long lines",
+      "type": "warning"
+    },
+    {
+      "category": "style",
+      "title": "Long line in /home/sticky/my-project1/ai-coding-agent/src/tool-chains.js:1596",
+      "message": "Consider breaking long lines",
+      "type": "warning"
+    },
+    {
+      "category": "style",
+      "title": "Long line in /home/sticky/my-project1/ai-coding-agent/src/tool-chains.js:1601",
+      "message": "Consider breaking long lines",
+      "type": "warning"
+    },
+    {
+      "category": "style",
+      "title": "Long line in /home/sticky/my-project1/ai-coding-agent/src/tool-chains.js:1612",
+      "message": "Consider breaking long lines",
+      "type": "warning"
+    },
+    {
+      "category": "style",
+      "title": "Long line in /home/sticky/my-project1/ai-coding-agent/src/tool-chains.js:1616",
+      "message": "Consider breaking long lines",
+      "type": "warning"
+    },
+    {
+      "category": "style",
+      "title": "Long line in /home/sticky/my-project1/ai-coding-agent/src/tool-chains.js:1651",
+      "message": "Consider breaking long lines",
+      "type": "warning"
+    },
+    {
+      "category": "style",
+      "title": "Long line in /home/sticky/my-project1/ai-coding-agent/src/tool-chains.js:1656",
+      "message": "Consider breaking long lines",
+      "type": "warning"
+    },
+    {
+      "category": "style",
+      "title": "Long line in /home/sticky/my-project1/ai-coding-agent/src/tool-chains.js:1667",
+      "message": "Consider breaking long lines",
+      "type": "warning"
+    },
+    {
+      "category": "style",
+      "title": "Long line in /home/sticky/my-project1/ai-coding-agent/src/tool-chains.js:1685",
+      "message": "Consider breaking long lines",
+      "type": "warning"
+    },
+    {
+      "category": "style",
+      "title": "Long line in /home/sticky/my-project1/ai-coding-agent/src/tool-chains.js:1699",
+      "message": "Consider breaking long lines",
+      "type": "warning"
+    },
+    {
+      "category": "style",
+      "title": "Long line in /home/sticky/my-project1/ai-coding-agent/src/tool-chains.js:1703",
+      "message": "Consider breaking long lines",
+      "type": "warning"
+    },
+    {
+      "category": "style",
+      "title": "Long line in /home/sticky/my-project1/ai-coding-agent/src/tool-chains.js:1708",
+      "message": "Consider breaking long lines",
+      "type": "warning"
+    },
+    {
+      "category": "style",
+      "title": "Long line in /home/sticky/my-project1/ai-coding-agent/src/tool-chains.js:1734",
+      "message": "Consider breaking long lines",
+      "type": "warning"
+    },
+    {
+      "category": "style",
+      "title": "Long line in /home/sticky/my-project1/ai-coding-agent/src/tool-chains.js:1746",
+      "message": "Consider breaking long lines",
+      "type": "warning"
+    },
+    {
+      "category": "style",
+      "title": "Long line in /home/sticky/my-project1/ai-coding-agent/src/tool-chains.js:1756",
+      "message": "Consider breaking long lines",
+      "type": "warning"
+    },
+    {
+      "category": "style",
+      "title": "Long line in /home/sticky/my-project1/ai-coding-agent/src/tool-chains.js:1761",
+      "message": "Consider breaking long lines",
+      "type": "warning"
+    },
+    {
+      "category": "style",
+      "title": "Long line in /home/sticky/my-project1/ai-coding-agent/src/tool-chains.js:1779",
+      "message": "Consider breaking long lines",
+      "type": "warning"
+    },
+    {
+      "category": "style",
+      "title": "Long line in /home/sticky/my-project1/ai-coding-agent/src/tool-chains.js:1812",
+      "message": "Consider breaking long lines",
+      "type": "warning"
+    },
+    {
+      "category": "style",
+      "title": "Long line in /home/sticky/my-project1/ai-coding-agent/src/tool-chains.js:1817",
+      "message": "Consider breaking long lines",
+      "type": "warning"
+    },
+    {
+      "category": "style",
+      "title": "Long line in /home/sticky/my-project1/ai-coding-agent/src/tool-chains.js:1859",
+      "message": "Consider breaking long lines",
+      "type": "warning"
+    },
+    {
+      "category": "style",
+      "title": "Long line in /home/sticky/my-project1/ai-coding-agent/src/tool-chains.js:1864",
+      "message": "Consider breaking long lines",
+      "type": "warning"
+    },
+    {
+      "category": "style",
+      "title": "Long line in /home/sticky/my-project1/ai-coding-agent/src/tool-chains.js:1900",
+      "message": "Consider breaking long lines",
+      "type": "warning"
+    },
+    {
+      "category": "style",
+      "title": "Long line in /home/sticky/my-project1/ai-coding-agent/src/tool-chains.js:1937",
+      "message": "Consider breaking long lines",
+      "type": "warning"
+    },
+    {
+      "category": "style",
+      "title": "Long line in /home/sticky/my-project1/ai-coding-agent/src/tool-chains.js:1990",
+      "message": "Consider breaking long lines",
+      "type": "warning"
+    },
+    {
+      "category": "style",
+      "title": "Long line in /home/sticky/my-project1/ai-coding-agent/src/tool-chains.js:2033",
+      "message": "Consider breaking long lines",
+      "type": "warning"
+    },
+    {
+      "category": "quality",
+      "title": "Console.log found in /home/sticky/my-project1/ai-coding-agent/src/voice-recognition.js",
+      "message": "Remove debug statements",
+      "type": "warning"
+    },
+    {
+      "category": "quality",
+      "title": "Console.log found in /home/sticky/my-project1/ai-coding-agent/src/web-scraper.js",
+      "message": "Remove debug statements",
+      "type": "warning"
+    },
+    {
+      "category": "quality",
+      "title": "Console.log found in /home/sticky/my-project1/ai-coding-agent/src/web-server.js",
+      "message": "Remove debug statements",
+      "type": "warning"
+    },
+    {
+      "category": "style",
+      "title": "Long line in /home/sticky/my-project1/ai-coding-agent/src/web-server.js:912",
+      "message": "Consider breaking long lines",
+      "type": "warning"
+    },
+    {
+      "category": "style",
+      "title": "Long line in /home/sticky/my-project1/ai-coding-agent/src/web-server.js:916",
+      "message": "Consider breaking long lines",
+      "type": "warning"
+    },
+    {
+      "category": "style",
+      "title": "Long line in /home/sticky/my-project1/ai-coding-agent/src/web-server.js:922",
+      "message": "Consider breaking long lines",
+      "type": "warning"
+    },
+    {
+      "category": "style",
+      "title": "Long line in /home/sticky/my-project1/ai-coding-agent/src/web-server.js:928",
+      "message": "Consider breaking long lines",
+      "type": "warning"
+    },
+    {
+      "category": "style",
+      "title": "Long line in /home/sticky/my-project1/ai-coding-agent/src/web-server.js:1018",
+      "message": "Consider breaking long lines",
+      "type": "warning"
+    },
+    {
+      "category": "style",
+      "title": "Long line in /home/sticky/my-project1/ai-coding-agent/src/web-server.js:1415",
+      "message": "Consider breaking long lines",
+      "type": "warning"
+    },
+    {
+      "category": "style",
+      "title": "Long line in /home/sticky/my-project1/ai-coding-agent/src/web-server.js:1646",
+      "message": "Consider breaking long lines",
+      "type": "warning"
+    },
+    {
+      "category": "quality",
+      "title": "Console.log found in /home/sticky/my-project1/ai-coding-agent/src/zero-trust-security.js",
+      "message": "Remove debug statements",
+      "type": "warning"
+    },
+    {
+      "category": "style",
+      "title": "Long line in /home/sticky/my-project1/ai-coding-agent/src/zero-trust-security.js:517",
+      "message": "Consider breaking long lines",
+      "type": "warning"
+    },
+    {
+      "category": "quality",
+      "title": "TODO/FIXME found in /home/sticky/my-project1/ai-coding-agent/test/agent.test.js",
+      "message": "Address pending items",
+      "type": "warning"
+    },
+    {
+      "category": "style",
+      "title": "Long line in /home/sticky/my-project1/ai-coding-agent/test/license.test.js:33",
+      "message": "Consider breaking long lines",
+      "type": "warning"
+    },
+    {
+      "category": "style",
+      "title": "Long line in /home/sticky/my-project1/ai-coding-agent/test/license.test.js:56",
+      "message": "Consider breaking long lines",
+      "type": "warning"
+    },
+    {
+      "category": "style",
+      "title": "Long line in /home/sticky/my-project1/ai-coding-agent/test/system-integration.test.js:297",
+      "message": "Consider breaking long lines",
+      "type": "warning"
+    },
+    {
+      "category": "style",
+      "title": "Long line in /home/sticky/my-project1/ai-coding-agent/test-toolchain.js:33",
+      "message": "Consider breaking long lines",
+      "type": "warning"
+    },
+    {
+      "category": "quality",
+      "title": "Console.log found in /home/sticky/my-project1/ai-coding-agent/web/js/app.js",
+      "message": "Remove debug statements",
+      "type": "warning"
+    },
+    {
+      "category": "style",
+      "title": "Long line in /home/sticky/my-project1/ai-coding-agent/web/js/app.js:761",
+      "message": "Consider breaking long lines",
+      "type": "warning"
+    },
+    {
+      "category": "style",
+      "title": "Long line in /home/sticky/my-project1/ai-coding-agent/web/js/app.js:1076",
+      "message": "Consider breaking long lines",
+      "type": "warning"
+    },
+    {
+      "category": "style",
+      "title": "Long line in /home/sticky/my-project1/ai-coding-agent/web/js/app.js:1080",
+      "message": "Consider breaking long lines",
+      "type": "warning"
+    },
+    {
+      "category": "quality",
+      "title": "Console.log found in /home/sticky/my-project1/ai-coding-agent/web/js/chains.js",
+      "message": "Remove debug statements",
+      "type": "warning"
+    },
+    {
+      "category": "quality",
+      "title": "TODO/FIXME found in /home/sticky/my-project1/ai-coding-agent/web/js/chains.js",
+      "message": "Address pending items",
+      "type": "warning"
+    },
+    {
+      "category": "style",
+      "title": "Long line in /home/sticky/my-project1/ai-coding-agent/web/js/chains.js:173",
+      "message": "Consider breaking long lines",
+      "type": "warning"
+    },
+    {
+      "category": "style",
+      "title": "Long line in /home/sticky/my-project1/ai-coding-agent/web/js/chains.js:198",
+      "message": "Consider breaking long lines",
+      "type": "warning"
+    },
+    {
+      "category": "style",
+      "title": "Long line in /home/sticky/my-project1/ai-coding-agent/web/js/chains.js:201",
+      "message": "Consider breaking long lines",
+      "type": "warning"
+    },
+    {
+      "category": "style",
+      "title": "Long line in /home/sticky/my-project1/ai-coding-agent/web/js/chains.js:254",
+      "message": "Consider breaking long lines",
+      "type": "warning"
+    },
+    {
+      "category": "style",
+      "title": "Long line in /home/sticky/my-project1/ai-coding-agent/web/js/chains.js:257",
+      "message": "Consider breaking long lines",
+      "type": "warning"
+    },
+    {
+      "category": "style",
+      "title": "Long line in /home/sticky/my-project1/ai-coding-agent/web/js/chains.js:516",
+      "message": "Consider breaking long lines",
+      "type": "warning"
+    },
+    {
+      "category": "style",
+      "title": "Long line in /home/sticky/my-project1/ai-coding-agent/web/js/chains.js:533",
+      "message": "Consider breaking long lines",
+      "type": "warning"
+    },
+    {
+      "category": "style",
+      "title": "Long line in /home/sticky/my-project1/ai-coding-agent/web/js/chains.js:545",
+      "message": "Consider breaking long lines",
+      "type": "warning"
+    },
+    {
+      "category": "style",
+      "title": "Long line in /home/sticky/my-project1/ai-coding-agent/web/js/chains.js:575",
+      "message": "Consider breaking long lines",
+      "type": "warning"
+    },
+    {
+      "category": "quality",
+      "title": "Console.log found in /home/sticky/my-project1/ai-coding-agent/web/js/chat.js",
+      "message": "Remove debug statements",
+      "type": "warning"
+    },
+    {
+      "category": "style",
+      "title": "Long line in /home/sticky/my-project1/ai-coding-agent/web/js/chat.js:656",
+      "message": "Consider breaking long lines",
+      "type": "warning"
+    },
+    {
+      "category": "style",
+      "title": "Long line in /home/sticky/my-project1/ai-coding-agent/web/js/chat.js:753",
+      "message": "Consider breaking long lines",
+      "type": "warning"
+    },
+    {
+      "category": "style",
+      "title": "Long line in /home/sticky/my-project1/ai-coding-agent/web/js/chat.js:786",
+      "message": "Consider breaking long lines",
+      "type": "warning"
+    },
+    {
+      "category": "style",
+      "title": "Long line in /home/sticky/my-project1/ai-coding-agent/web/js/chat.js:790",
+      "message": "Consider breaking long lines",
+      "type": "warning"
+    },
+    {
+      "category": "style",
+      "title": "Long line in /home/sticky/my-project1/ai-coding-agent/web/js/chat.js:801",
+      "message": "Consider breaking long lines",
+      "type": "warning"
+    },
+    {
+      "category": "style",
+      "title": "Long line in /home/sticky/my-project1/ai-coding-agent/web/js/chat.js:809",
+      "message": "Consider breaking long lines",
+      "type": "warning"
+    },
+    {
+      "category": "style",
+      "title": "Long line in /home/sticky/my-project1/ai-coding-agent/web/js/files.js:49",
+      "message": "Consider breaking long lines",
+      "type": "warning"
+    },
+    {
+      "category": "style",
+      "title": "Long line in /home/sticky/my-project1/ai-coding-agent/web/js/files.js:101",
+      "message": "Consider breaking long lines",
+      "type": "warning"
+    },
+    {
+      "category": "style",
+      "title": "Long line in /home/sticky/my-project1/ai-coding-agent/web/js/files.js:208",
+      "message": "Consider breaking long lines",
+      "type": "warning"
+    },
+    {
+      "category": "style",
+      "title": "Long line in /home/sticky/my-project1/ai-coding-agent/web/js/files.js:209",
+      "message": "Consider breaking long lines",
+      "type": "warning"
+    },
+    {
+      "category": "style",
+      "title": "Long line in /home/sticky/my-project1/ai-coding-agent/web/js/files.js:467",
+      "message": "Consider breaking long lines",
+      "type": "warning"
+    },
+    {
+      "category": "style",
+      "title": "Long line in /home/sticky/my-project1/ai-coding-agent/web/js/files.js:471",
+      "message": "Consider breaking long lines",
+      "type": "warning"
+    },
+    {
+      "category": "style",
+      "title": "Long line in /home/sticky/my-project1/ai-coding-agent/web/js/jobs.js:70",
+      "message": "Consider breaking long lines",
+      "type": "warning"
+    },
+    {
+      "category": "style",
+      "title": "Long line in /home/sticky/my-project1/ai-coding-agent/web/js/jobs.js:71",
+      "message": "Consider breaking long lines",
+      "type": "warning"
+    },
+    {
+      "category": "quality",
+      "title": "Console.log found in /home/sticky/my-project1/ai-coding-agent/web/js/memory.js",
+      "message": "Remove debug statements",
+      "type": "warning"
+    },
+    {
+      "category": "style",
+      "title": "Long line in /home/sticky/my-project1/ai-coding-agent/web/js/memory.js:162",
+      "message": "Consider breaking long lines",
+      "type": "warning"
+    },
+    {
+      "category": "style",
+      "title": "Long line in /home/sticky/my-project1/ai-coding-agent/web/js/memory.js:163",
+      "message": "Consider breaking long lines",
+      "type": "warning"
+    },
+    {
+      "category": "style",
+      "title": "Long line in /home/sticky/my-project1/ai-coding-agent/web/js/memory.js:164",
+      "message": "Consider breaking long lines",
+      "type": "warning"
+    },
+    {
+      "category": "style",
+      "title": "Long line in /home/sticky/my-project1/ai-coding-agent/web/js/memory.js:186",
+      "message": "Consider breaking long lines",
+      "type": "warning"
+    },
+    {
+      "category": "style",
+      "title": "Long line in /home/sticky/my-project1/ai-coding-agent/web/js/memory.js:200",
+      "message": "Consider breaking long lines",
+      "type": "warning"
+    },
+    {
+      "category": "style",
+      "title": "Long line in /home/sticky/my-project1/ai-coding-agent/web/js/memory.js:204",
+      "message": "Consider breaking long lines",
+      "type": "warning"
+    },
+    {
+      "category": "style",
+      "title": "Long line in /home/sticky/my-project1/ai-coding-agent/web/js/memory.js:304",
+      "message": "Consider breaking long lines",
+      "type": "warning"
+    },
+    {
+      "category": "style",
+      "title": "Long line in /home/sticky/my-project1/ai-coding-agent/web/js/memory.js:381",
+      "message": "Consider breaking long lines",
+      "type": "warning"
+    },
+    {
+      "category": "style",
+      "title": "Long line in /home/sticky/my-project1/ai-coding-agent/web/js/memory.js:382",
+      "message": "Consider breaking long lines",
+      "type": "warning"
+    },
+    {
+      "category": "quality",
+      "title": "TODO/FIXME found in /home/sticky/my-project1/ai-coding-agent/web/js/tools.js",
+      "message": "Address pending items",
+      "type": "warning"
+    },
+    {
+      "category": "style",
+      "title": "Long line in /home/sticky/my-project1/ai-coding-agent/web/js/tools.js:44",
+      "message": "Consider breaking long lines",
+      "type": "warning"
+    },
+    {
+      "category": "style",
+      "title": "Long line in /home/sticky/my-project1/ai-coding-agent/web/js/tools.js:51",
+      "message": "Consider breaking long lines",
+      "type": "warning"
+    },
+    {
+      "category": "style",
+      "title": "Long line in /home/sticky/my-project1/ai-coding-agent/web/js/tools.js:52",
+      "message": "Consider breaking long lines",
+      "type": "warning"
+    },
+    {
+      "category": "style",
+      "title": "Long line in /home/sticky/my-project1/ai-coding-agent/web/js/tools.js:74",
+      "message": "Consider breaking long lines",
+      "type": "warning"
+    },
+    {
+      "category": "style",
+      "title": "Long line in /home/sticky/my-project1/ai-coding-agent/web/js/tools.js:81",
+      "message": "Consider breaking long lines",
+      "type": "warning"
+    },
+    {
+      "category": "style",
+      "title": "Long line in /home/sticky/my-project1/ai-coding-agent/web/js/tools.js:83",
+      "message": "Consider breaking long lines",
+      "type": "warning"
+    },
+    {
+      "category": "style",
+      "title": "Long line in /home/sticky/my-project1/ai-coding-agent/web/js/tools.js:92",
+      "message": "Consider breaking long lines",
+      "type": "warning"
+    },
+    {
+      "category": "style",
+      "title": "Long line in /home/sticky/my-project1/ai-coding-agent/web/js/tools.js:119",
+      "message": "Consider breaking long lines",
+      "type": "warning"
+    },
+    {
+      "category": "style",
+      "title": "Long line in /home/sticky/my-project1/ai-coding-agent/web/js/tools.js:120",
+      "message": "Consider breaking long lines",
+      "type": "warning"
+    },
+    {
+      "category": "style",
+      "title": "Long line in /home/sticky/my-project1/ai-coding-agent/web/js/tools.js:179",
+      "message": "Consider breaking long lines",
+      "type": "warning"
+    },
+    {
+      "category": "style",
+      "title": "Long line in /home/sticky/my-project1/ai-coding-agent/web/js/tools.js:181",
+      "message": "Consider breaking long lines",
+      "type": "warning"
+    },
+    {
+      "category": "config",
+      "title": ".env missing variable",
+      "message": "Consider adding: NODE_ENV",
+      "type": "warning"
+    },
+    {
+      "category": "config",
+      "title": ".env missing variable",
+      "message": "Consider adding: PORT",
+      "type": "warning"
+    },
+    {
+      "category": "security",
+      "title": "Insecure permissions on package.json",
+      "message": "Restrict file permissions",
+      "type": "warning"
+    },
+    {
+      "category": "security",
+      "title": "Insecure permissions on .env",
+      "message": "Restrict file permissions",
+      "type": "warning"
+    },
+    {
+      "category": "security",
+      "title": "innerHTML usage in /home/sticky/my-project1/ai-coding-agent/scripts/comprehensive-error-check.js",
+      "message": "Consider safer alternatives",
+      "type": "warning"
+    },
+    {
+      "category": "security",
+      "title": "innerHTML usage in /home/sticky/my-project1/ai-coding-agent/src/simulation-sandbox.js",
+      "message": "Consider safer alternatives",
+      "type": "warning"
+    },
+    {
+      "category": "security",
+      "title": "innerHTML usage in /home/sticky/my-project1/ai-coding-agent/web/js/app.js",
+      "message": "Consider safer alternatives",
+      "type": "warning"
+    },
+    {
+      "category": "security",
+      "title": "innerHTML usage in /home/sticky/my-project1/ai-coding-agent/web/js/chains.js",
+      "message": "Consider safer alternatives",
+      "type": "warning"
+    },
+    {
+      "category": "security",
+      "title": "innerHTML usage in /home/sticky/my-project1/ai-coding-agent/web/js/chat.js",
+      "message": "Consider safer alternatives",
+      "type": "warning"
+    },
+    {
+      "category": "security",
+      "title": "innerHTML usage in /home/sticky/my-project1/ai-coding-agent/web/js/files.js",
+      "message": "Consider safer alternatives",
+      "type": "warning"
+    },
+    {
+      "category": "security",
+      "title": "innerHTML usage in /home/sticky/my-project1/ai-coding-agent/web/js/jobs.js",
+      "message": "Consider safer alternatives",
+      "type": "warning"
+    },
+    {
+      "category": "security",
+      "title": "innerHTML usage in /home/sticky/my-project1/ai-coding-agent/web/js/memory.js",
+      "message": "Consider safer alternatives",
+      "type": "warning"
+    },
+    {
+      "category": "performance",
+      "title": "Sync file operations in /home/sticky/my-project1/ai-coding-agent/scripts/comprehensive-error-check.js",
+      "message": "Use async alternatives",
+      "type": "warning"
+    },
+    {
+      "category": "performance",
+      "title": "Potential blocking loop in /home/sticky/my-project1/ai-coding-agent/scripts/comprehensive-error-check.js",
+      "message": "Review loop conditions",
+      "type": "warning"
+    },
+    {
+      "category": "performance",
+      "title": "Sync file operations in /home/sticky/my-project1/ai-coding-agent/scripts/gen-manifest.js",
+      "message": "Use async alternatives",
+      "type": "warning"
+    },
+    {
+      "category": "performance",
+      "title": "Sync file operations in /home/sticky/my-project1/ai-coding-agent/scripts/generate-keys.js",
+      "message": "Use async alternatives",
+      "type": "warning"
+    },
+    {
+      "category": "performance",
+      "title": "Sync file operations in /home/sticky/my-project1/ai-coding-agent/scripts/new-adr.js",
+      "message": "Use async alternatives",
+      "type": "warning"
+    },
+    {
+      "category": "performance",
+      "title": "Sync file operations in /home/sticky/my-project1/ai-coding-agent/scripts/rotate-license.js",
+      "message": "Use async alternatives",
+      "type": "warning"
+    },
+    {
+      "category": "performance",
+      "title": "Sync file operations in /home/sticky/my-project1/ai-coding-agent/scripts/sign-license.js",
+      "message": "Use async alternatives",
+      "type": "warning"
+    },
+    {
+      "category": "performance",
+      "title": "Sync file operations in /home/sticky/my-project1/ai-coding-agent/src/advanced-anti-tamper.js",
+      "message": "Use async alternatives",
+      "type": "warning"
+    },
+    {
+      "category": "performance",
+      "title": "Sync file operations in /home/sticky/my-project1/ai-coding-agent/src/anti-tamper.js",
+      "message": "Use async alternatives",
+      "type": "warning"
+    },
+    {
+      "category": "performance",
+      "title": "Sync file operations in /home/sticky/my-project1/ai-coding-agent/src/blockchain-audit.js",
+      "message": "Use async alternatives",
+      "type": "warning"
+    },
+    {
+      "category": "performance",
+      "title": "Sync file operations in /home/sticky/my-project1/ai-coding-agent/src/cli.js",
+      "message": "Use async alternatives",
+      "type": "warning"
+    },
+    {
+      "category": "performance",
+      "title": "Sync file operations in /home/sticky/my-project1/ai-coding-agent/src/ip-protection.js",
+      "message": "Use async alternatives",
+      "type": "warning"
+    },
+    {
+      "category": "performance",
+      "title": "Sync file operations in /home/sticky/my-project1/ai-coding-agent/src/license.js",
+      "message": "Use async alternatives",
+      "type": "warning"
+    },
+    {
+      "category": "performance",
+      "title": "Sync file operations in /home/sticky/my-project1/ai-coding-agent/src/quantum-crypto.js",
+      "message": "Use async alternatives",
+      "type": "warning"
+    },
+    {
+      "category": "performance",
+      "title": "Sync file operations in /home/sticky/my-project1/ai-coding-agent/src/voice-recognition.js",
+      "message": "Use async alternatives",
+      "type": "warning"
+    },
+    {
+      "category": "performance",
+      "title": "Sync file operations in /home/sticky/my-project1/ai-coding-agent/test/anti-tamper.test.js",
+      "message": "Use async alternatives",
+      "type": "warning"
+    },
+    {
+      "category": "quality",
+      "title": "Commented code in /home/sticky/my-project1/ai-coding-agent/scripts/comprehensive-error-check.js",
+      "message": "Remove unused commented code",
+      "type": "warning"
+    },
+    {
+      "category": "quality",
+      "title": "Commented code in /home/sticky/my-project1/ai-coding-agent/scripts/gen-manifest.js",
+      "message": "Remove unused commented code",
+      "type": "warning"
+    },
+    {
+      "category": "quality",
+      "title": "Commented code in /home/sticky/my-project1/ai-coding-agent/scripts/gh-actions.js",
+      "message": "Remove unused commented code",
+      "type": "warning"
+    },
+    {
+      "category": "quality",
+      "title": "Commented code in /home/sticky/my-project1/ai-coding-agent/scripts/gh-dispatch.js",
+      "message": "Remove unused commented code",
+      "type": "warning"
+    },
+    {
+      "category": "quality",
+      "title": "Commented code in /home/sticky/my-project1/ai-coding-agent/scripts/health-check.js",
+      "message": "Remove unused commented code",
+      "type": "warning"
+    },
+    {
+      "category": "quality",
+      "title": "Commented code in /home/sticky/my-project1/ai-coding-agent/scripts/new-adr.js",
+      "message": "Remove unused commented code",
+      "type": "warning"
+    },
+    {
+      "category": "quality",
+      "title": "Commented code in /home/sticky/my-project1/ai-coding-agent/scripts/repo-setup.js",
+      "message": "Remove unused commented code",
+      "type": "warning"
+    },
+    {
+      "category": "quality",
+      "title": "Commented code in /home/sticky/my-project1/ai-coding-agent/scripts/rotate-license.js",
+      "message": "Remove unused commented code",
+      "type": "warning"
+    },
+    {
+      "category": "quality",
+      "title": "Commented code in /home/sticky/my-project1/ai-coding-agent/scripts/sign-license.js",
+      "message": "Remove unused commented code",
+      "type": "warning"
+    },
+    {
+      "category": "quality",
+      "title": "Commented code in /home/sticky/my-project1/ai-coding-agent/scripts/worker.js",
+      "message": "Remove unused commented code",
+      "type": "warning"
+    },
+    {
+      "category": "quality",
+      "title": "Commented code in /home/sticky/my-project1/ai-coding-agent/src/adaptive-style.js",
+      "message": "Remove unused commented code",
+      "type": "warning"
+    },
+    {
+      "category": "quality",
+      "title": "Commented code in /home/sticky/my-project1/ai-coding-agent/src/advanced-anti-tamper.js",
+      "message": "Remove unused commented code",
+      "type": "warning"
+    },
+    {
+      "category": "quality",
+      "title": "Commented code in /home/sticky/my-project1/ai-coding-agent/src/advanced-license.js",
+      "message": "Remove unused commented code",
+      "type": "warning"
+    },
+    {
+      "category": "quality",
+      "title": "Commented code in /home/sticky/my-project1/ai-coding-agent/src/agent.js",
+      "message": "Remove unused commented code",
+      "type": "warning"
+    },
+    {
+      "category": "quality",
+      "title": "Commented code in /home/sticky/my-project1/ai-coding-agent/src/ai-orchestration.js",
+      "message": "Remove unused commented code",
+      "type": "warning"
+    },
+    {
+      "category": "quality",
+      "title": "Commented code in /home/sticky/my-project1/ai-coding-agent/src/ai-provider.js",
+      "message": "Remove unused commented code",
+      "type": "warning"
+    },
+    {
+      "category": "quality",
+      "title": "Commented code in /home/sticky/my-project1/ai-coding-agent/src/anti-tamper.js",
+      "message": "Remove unused commented code",
+      "type": "warning"
+    },
+    {
+      "category": "quality",
+      "title": "Commented code in /home/sticky/my-project1/ai-coding-agent/src/auth.js",
+      "message": "Remove unused commented code",
+      "type": "warning"
+    },
+    {
+      "category": "quality",
+      "title": "Commented code in /home/sticky/my-project1/ai-coding-agent/src/blockchain-audit.js",
+      "message": "Remove unused commented code",
+      "type": "warning"
+    },
+    {
+      "category": "quality",
+      "title": "Commented code in /home/sticky/my-project1/ai-coding-agent/src/cli.js",
+      "message": "Remove unused commented code",
+      "type": "warning"
+    },
+    {
+      "category": "quality",
+      "title": "Commented code in /home/sticky/my-project1/ai-coding-agent/src/code-analyzer.js",
+      "message": "Remove unused commented code",
+      "type": "warning"
+    },
+    {
+      "category": "quality",
+      "title": "Commented code in /home/sticky/my-project1/ai-coding-agent/src/command-parser.js",
+      "message": "Remove unused commented code",
+      "type": "warning"
+    },
+    {
+      "category": "quality",
+      "title": "Commented code in /home/sticky/my-project1/ai-coding-agent/src/compliance.js",
+      "message": "Remove unused commented code",
+      "type": "warning"
+    },
+    {
+      "category": "quality",
+      "title": "Commented code in /home/sticky/my-project1/ai-coding-agent/src/config-manager.js",
+      "message": "Remove unused commented code",
+      "type": "warning"
+    },
+    {
+      "category": "quality",
+      "title": "Commented code in /home/sticky/my-project1/ai-coding-agent/src/context-search.js",
+      "message": "Remove unused commented code",
+      "type": "warning"
+    },
+    {
+      "category": "quality",
+      "title": "Commented code in /home/sticky/my-project1/ai-coding-agent/src/enhanced-error-system.js",
+      "message": "Remove unused commented code",
+      "type": "warning"
+    },
+    {
+      "category": "quality",
+      "title": "Commented code in /home/sticky/my-project1/ai-coding-agent/src/enterprise-agent.js",
+      "message": "Remove unused commented code",
+      "type": "warning"
+    },
+    {
+      "category": "quality",
+      "title": "Commented code in /home/sticky/my-project1/ai-coding-agent/src/error-healing.js",
+      "message": "Remove unused commented code",
+      "type": "warning"
+    },
+    {
+      "category": "quality",
+      "title": "Commented code in /home/sticky/my-project1/ai-coding-agent/src/error-validation-system.js",
+      "message": "Remove unused commented code",
+      "type": "warning"
+    },
+    {
+      "category": "quality",
+      "title": "Commented code in /home/sticky/my-project1/ai-coding-agent/src/facial-recognition.js",
+      "message": "Remove unused commented code",
+      "type": "warning"
+    },
+    {
+      "category": "quality",
+      "title": "Commented code in /home/sticky/my-project1/ai-coding-agent/src/filesystem.js",
+      "message": "Remove unused commented code",
+      "type": "warning"
+    },
+    {
+      "category": "quality",
+      "title": "Commented code in /home/sticky/my-project1/ai-coding-agent/src/goal-planner.js",
+      "message": "Remove unused commented code",
+      "type": "warning"
+    },
+    {
+      "category": "quality",
+      "title": "Commented code in /home/sticky/my-project1/ai-coding-agent/src/integration-manager.js",
+      "message": "Remove unused commented code",
+      "type": "warning"
+    },
+    {
+      "category": "quality",
+      "title": "Commented code in /home/sticky/my-project1/ai-coding-agent/src/integrations/base-integration.js",
+      "message": "Remove unused commented code",
+      "type": "warning"
+    },
+    {
+      "category": "quality",
+      "title": "Commented code in /home/sticky/my-project1/ai-coding-agent/src/ip-protection.js",
+      "message": "Remove unused commented code",
+      "type": "warning"
+    },
+    {
+      "category": "quality",
+      "title": "Commented code in /home/sticky/my-project1/ai-coding-agent/src/license.js",
+      "message": "Remove unused commented code",
+      "type": "warning"
+    },
+    {
+      "category": "quality",
+      "title": "Commented code in /home/sticky/my-project1/ai-coding-agent/src/local-voice-recognition.js",
+      "message": "Remove unused commented code",
+      "type": "warning"
+    },
+    {
+      "category": "quality",
+      "title": "Commented code in /home/sticky/my-project1/ai-coding-agent/src/memory.js",
+      "message": "Remove unused commented code",
+      "type": "warning"
+    },
+    {
+      "category": "quality",
+      "title": "Commented code in /home/sticky/my-project1/ai-coding-agent/src/metrics.js",
+      "message": "Remove unused commented code",
+      "type": "warning"
+    },
+    {
+      "category": "quality",
+      "title": "Commented code in /home/sticky/my-project1/ai-coding-agent/src/ml-security.js",
+      "message": "Remove unused commented code",
+      "type": "warning"
+    },
+    {
+      "category": "quality",
+      "title": "Commented code in /home/sticky/my-project1/ai-coding-agent/src/monitoring-system.js",
+      "message": "Remove unused commented code",
+      "type": "warning"
+    },
+    {
+      "category": "quality",
+      "title": "Commented code in /home/sticky/my-project1/ai-coding-agent/src/multi-agent.js",
+      "message": "Remove unused commented code",
+      "type": "warning"
+    },
+    {
+      "category": "quality",
+      "title": "Commented code in /home/sticky/my-project1/ai-coding-agent/src/negotiator-agent.js",
+      "message": "Remove unused commented code",
+      "type": "warning"
+    },
+    {
+      "category": "quality",
+      "title": "Commented code in /home/sticky/my-project1/ai-coding-agent/src/predictive-helper.js",
+      "message": "Remove unused commented code",
+      "type": "warning"
+    },
+    {
+      "category": "quality",
+      "title": "Commented code in /home/sticky/my-project1/ai-coding-agent/src/quantum-crypto.js",
+      "message": "Remove unused commented code",
+      "type": "warning"
+    },
+    {
+      "category": "quality",
+      "title": "Commented code in /home/sticky/my-project1/ai-coding-agent/src/recognition-app.js",
+      "message": "Remove unused commented code",
+      "type": "warning"
+    },
+    {
+      "category": "quality",
+      "title": "Commented code in /home/sticky/my-project1/ai-coding-agent/src/refactoring-optimizer.js",
+      "message": "Remove unused commented code",
+      "type": "warning"
+    },
+    {
+      "category": "quality",
+      "title": "Commented code in /home/sticky/my-project1/ai-coding-agent/src/security.js",
+      "message": "Remove unused commented code",
+      "type": "warning"
+    },
+    {
+      "category": "quality",
+      "title": "Commented code in /home/sticky/my-project1/ai-coding-agent/src/simulation-sandbox.js",
+      "message": "Remove unused commented code",
+      "type": "warning"
+    },
+    {
+      "category": "quality",
+      "title": "Commented code in /home/sticky/my-project1/ai-coding-agent/src/system-health-checker.js",
+      "message": "Remove unused commented code",
+      "type": "warning"
+    },
+    {
+      "category": "quality",
+      "title": "Commented code in /home/sticky/my-project1/ai-coding-agent/src/system-orchestrator.js",
+      "message": "Remove unused commented code",
+      "type": "warning"
+    },
+    {
+      "category": "quality",
+      "title": "Commented code in /home/sticky/my-project1/ai-coding-agent/src/testing/enhanced-test-framework.js",
+      "message": "Remove unused commented code",
+      "type": "warning"
+    },
+    {
+      "category": "quality",
+      "title": "Commented code in /home/sticky/my-project1/ai-coding-agent/src/tool-chains.js",
+      "message": "Remove unused commented code",
+      "type": "warning"
+    },
+    {
+      "category": "quality",
+      "title": "Commented code in /home/sticky/my-project1/ai-coding-agent/src/validation.js",
+      "message": "Remove unused commented code",
+      "type": "warning"
+    },
+    {
+      "category": "quality",
+      "title": "Commented code in /home/sticky/my-project1/ai-coding-agent/src/voice-recognition.js",
+      "message": "Remove unused commented code",
+      "type": "warning"
+    },
+    {
+      "category": "quality",
+      "title": "Commented code in /home/sticky/my-project1/ai-coding-agent/src/web-scraper.js",
+      "message": "Remove unused commented code",
+      "type": "warning"
+    },
+    {
+      "category": "quality",
+      "title": "Commented code in /home/sticky/my-project1/ai-coding-agent/src/web-server.js",
+      "message": "Remove unused commented code",
+      "type": "warning"
+    },
+    {
+      "category": "quality",
+      "title": "Commented code in /home/sticky/my-project1/ai-coding-agent/src/zero-trust-security.js",
+      "message": "Remove unused commented code",
+      "type": "warning"
+    },
+    {
+      "category": "quality",
+      "title": "Commented code in /home/sticky/my-project1/ai-coding-agent/test/agent.test.js",
+      "message": "Remove unused commented code",
+      "type": "warning"
+    },
+    {
+      "category": "quality",
+      "title": "Commented code in /home/sticky/my-project1/ai-coding-agent/test/anti-tamper.test.js",
+      "message": "Remove unused commented code",
+      "type": "warning"
+    },
+    {
+      "category": "quality",
+      "title": "Commented code in /home/sticky/my-project1/ai-coding-agent/test/license.test.js",
+      "message": "Remove unused commented code",
+      "type": "warning"
+    },
+    {
+      "category": "quality",
+      "title": "Commented code in /home/sticky/my-project1/ai-coding-agent/test/system-integration.test.js",
+      "message": "Remove unused commented code",
+      "type": "warning"
+    },
+    {
+      "category": "quality",
+      "title": "Commented code in /home/sticky/my-project1/ai-coding-agent/test/web-scraper.test.js",
+      "message": "Remove unused commented code",
+      "type": "warning"
+    },
+    {
+      "category": "quality",
+      "title": "Commented code in /home/sticky/my-project1/ai-coding-agent/test-toolchain.js",
+      "message": "Remove unused commented code",
+      "type": "warning"
+    },
+    {
+      "category": "quality",
+      "title": "Commented code in /home/sticky/my-project1/ai-coding-agent/web/js/app.js",
+      "message": "Remove unused commented code",
+      "type": "warning"
+    },
+    {
+      "category": "quality",
+      "title": "Commented code in /home/sticky/my-project1/ai-coding-agent/web/js/chains.js",
+      "message": "Remove unused commented code",
+      "type": "warning"
+    },
+    {
+      "category": "quality",
+      "title": "Commented code in /home/sticky/my-project1/ai-coding-agent/web/js/chat.js",
+      "message": "Remove unused commented code",
+      "type": "warning"
+    },
+    {
+      "category": "quality",
+      "title": "Commented code in /home/sticky/my-project1/ai-coding-agent/web/js/files.js",
+      "message": "Remove unused commented code",
+      "type": "warning"
+    },
+    {
+      "category": "quality",
+      "title": "Commented code in /home/sticky/my-project1/ai-coding-agent/web/js/jobs.js",
+      "message": "Remove unused commented code",
+      "type": "warning"
+    },
+    {
+      "category": "quality",
+      "title": "Commented code in /home/sticky/my-project1/ai-coding-agent/web/js/memory.js",
+      "message": "Remove unused commented code",
+      "type": "warning"
+    },
+    {
+      "category": "quality",
+      "title": "Commented code in /home/sticky/my-project1/ai-coding-agent/web/js/tools.js",
+      "message": "Remove unused commented code",
+      "type": "warning"
+    }
+  ],
+  "suggestions": [
+    {
+      "category": "dependencies",
+      "title": "Dependency analysis",
+      "message": "Run npm audit for detailed dependency analysis",
+      "type": "suggestion"
+    },
+    {
+      "category": "dependencies",
+      "title": "Unused dependencies",
+      "message": "Use tools like depcheck to find unused dependencies",
+      "type": "suggestion"
+    },
+    {
+      "category": "dependencies",
+      "title": "Outdated dependencies",
+      "message": "Run npm outdated to check for updates",
+      "type": "suggestion"
+    },
+    {
+      "category": "dependencies",
+      "title": "Circular dependencies",
+      "message": "Use tools like madge to detect circular dependencies",
+      "type": "suggestion"
+    },
+    {
+      "category": "quality",
+      "title": "Code complexity",
+      "message": "Use tools like complexity-report for detailed analysis",
+      "type": "suggestion"
+    },
+    {
+      "category": "quality",
+      "title": "Code duplication",
+      "message": "Use tools like jscpd to detect code duplication",
+      "type": "suggestion"
+    },
+    {
+      "category": "quality",
+      "title": "Best practices",
+      "message": "Use ESLint with recommended rules",
+      "type": "suggestion"
+    }
+  ]
+}

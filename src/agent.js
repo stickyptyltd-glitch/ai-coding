@@ -852,14 +852,6 @@ Please provide:
       .map(([command, count]) => ({ command, count }));
   }
 
-    return {
-      success: true,
-      analysis,
-      insights: aiResponse,
-      filePath
-    };
-  }
-
   async modifyCode(filePath, instructions) {
     const content = await this.filesystem.readFile(filePath);
     
