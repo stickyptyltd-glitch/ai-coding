@@ -1,0 +1,38 @@
+{
+  "timestamp": "2025-08-30T12:52:29.271Z",
+  "duration": 2538,
+  "upgrades": [
+    "Enhanced AI Provider with retry logic",
+    "Enhanced Agent with improved capabilities",
+    "Enhanced Web Server with security improvements",
+    "Enhanced CLI with new commands",
+    "Added TypeScript support with strict configuration",
+    "Added performance monitoring system",
+    "Added advanced logging system",
+    "Added caching layer for improved performance",
+    "Optimized memory usage patterns",
+    "Added comprehensive input validation",
+    "Enhanced rate limiting and security measures"
+  ],
+  "backups": [
+    "package.json",
+    "package-lock.json",
+    "src/",
+    "web/",
+    "test/",
+    "scripts/"
+  ],
+  "errors": [
+    "Core functionality test failed: A class may only have one constructor"
+  ],
+  "warnings": [
+    "Error check found issues - review error-check-report.json"
+  ],
+  "summary": {
+    "totalUpgrades": 11,
+    "totalBackups": 6,
+    "totalErrors": 1,
+    "totalWarnings": 1,
+    "success": false
+  }
+}

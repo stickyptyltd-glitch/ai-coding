@@ -839,13 +839,3 @@ class ComplianceManager {
 
 // Export the enhanced security manager and utilities
 export { EnhancedSecurityManager, ThreatDetectionEngine, RoleBasedAccessControl, SecureSessionManager, EncryptionManager, ComplianceManager };
-
-  // Compression (optional)
-  try {
-    const compressionMod = await import('compression');
-    const compression = compressionMod.default || compressionMod;
-    app.use(compression());
-  } catch {
-    // compression not installed; skip
-  }
-}

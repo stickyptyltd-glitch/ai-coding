@@ -16,9 +16,9 @@ ensureLicenseOrExit();
 const program = new Command();
 
 program
-  .name('ai-agent')
-  .description('AI-powered coding agent for code analysis, modification, and generation')
-  .version('1.0.0');
+  .name('lecheyne-ai')
+  .description('🚀 Lecheyne AI - The Ultimate Multi-Agent Development Platform. Enterprise-grade AI intelligence for transformative coding workflows.')
+  .version('2.0.0');
 
 program
   .command('interactive')

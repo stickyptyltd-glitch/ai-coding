@@ -1,0 +1,562 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Coding Agent</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🤖</text></svg>">
+</head>
+<body>
+    <div id="app">
+        <!-- Header -->
+        <header class="app-header">
+            <div class="header-content">
+                <div class="logo">
+                    <span class="logo-icon">🤖</span>
+                    <span class="logo-text">AI Coding Agent</span>
+                </div>
+                <div class="header-controls">
+                    <a href="/docs/README.md" class="icon-btn" title="Docs" style="text-decoration:none; display:inline-flex; align-items:center;">
+                        📖
+                    </a>
+                    <button id="settings-btn" class="icon-btn" title="Settings">⚙️</button>
+                    <button id="help-btn" class="icon-btn" title="Help">❓</button>
+                    <div class="status-indicator">
+                        <span id="connection-status" class="status-dot offline"></span>
+                        <span id="status-text">Connecting...</span>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <div class="app-body">
+            <!-- Sidebar -->
+            <aside class="sidebar">
+                <nav class="nav-menu">
+                    <button class="nav-item active" data-view="chat">
+                        <span class="nav-icon">💬</span>
+                        <span class="nav-text">Chat</span>
+                    </button>
+                    <button class="nav-item" data-view="tools">
+                        <span class="nav-icon">🔧</span>
+                        <span class="nav-text">Tools</span>
+                    </button>
+                    <button class="nav-item" data-view="chains">
+                        <span class="nav-icon">🔗</span>
+                        <span class="nav-text">Chains</span>
+                    </button>
+                    <button class="nav-item" data-view="web">
+                        <span class="nav-icon">🌐</span>
+                        <span class="nav-text">Web</span>
+                    </button>
+                    <button class="nav-item" data-view="builder">
+                        <span class="nav-icon">🏗️</span>
+                        <span class="nav-text">Project Builder</span>
+                    </button>
+                    <button class="nav-item" data-view="memory">
+                        <span class="nav-icon">🧠</span>
+                        <span class="nav-text">Memory</span>
+                    </button>
+                    <button class="nav-item" data-view="files">
+                        <span class="nav-icon">📁</span>
+                        <span class="nav-text">Files</span>
+                    </button>
+                    <button class="nav-item" data-view="jobs">
+                        <span class="nav-icon">📊</span>
+                        <span class="nav-text">Jobs</span>
+                    </button>
+                </nav>
+
+                <!-- Conversation List -->
+                <div class="conversation-list">
+                    <div class="section-header">
+                        <h3>Conversations</h3>
+                        <button id="new-conversation" class="icon-btn" title="New Conversation">➕</button>
+                    </div>
+                    <div id="conversations" class="conversations">
+                        <!-- Conversations will be loaded here -->
+                    </div>
+                </div>
+            </aside>
+
+            <!-- Main Content Area -->
+            <main class="main-content">
+                <!-- Chat View -->
+                <div id="chat-view" class="view active">
+                    <div class="chat-container">
+                        <div id="chat-messages" class="chat-messages">
+                            <div class="welcome-message">
+                                <h2>Welcome to AI Coding Agent! 🤖</h2>
+                                <p>I can help you with:</p>
+                                <ul>
+                                    <li>Code analysis and explanation</li>
+                                    <li>Code generation and modification</li>
+                                    <li>Web scraping and analysis</li>
+                                    <li>Complex multi-step workflows</li>
+                                    <li>Project management and documentation</li>
+                                </ul>
+                                <p>Start by typing a message or use the tools in the sidebar!</p>
+                            </div>
+                        </div>
+                        <div class="chat-input-container">
+                            <div class="input-wrapper">
+                                <textarea id="chat-input" placeholder="Type your message... (Shift+Enter for new line)" rows="1"></textarea>
+                                <button id="send-btn" class="send-btn" disabled>
+                                    <span class="send-icon">🚀</span>
+                                </button>
+                            </div>
+                            <div class="input-controls">
+                                <button id="voice-btn" class="control-btn" title="Voice Input">🎤</button>
+                                <button id="attach-btn" class="control-btn" title="Attach File">📎</button>
+                                <label class="memory-toggle">
+                                    <input type="checkbox" id="memory-enabled" checked>
+                                    <span>Remember conversation</span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tools View -->
+                <div id="tools-view" class="view">
+                    <div class="tools-container">
+                        <h2>Code Tools</h2>
+                        <div class="tool-grid">
+                            <div class="tool-card" data-tool="analyze">
+                                <div class="tool-icon">🔍</div>
+                                <h3>Analyze Code</h3>
+                                <p>Analyze code structure and quality</p>
+                                <button class="tool-btn">Use Tool</button>
+                            </div>
+                            <div class="tool-card" data-tool="modify">
+                                <div class="tool-icon">✏️</div>
+                                <h3>Modify Code</h3>
+                                <p>AI-powered code modifications</p>
+                                <button class="tool-btn">Use Tool</button>
+                            </div>
+                            <div class="tool-card" data-tool="create">
+                                <div class="tool-icon">🆕</div>
+                                <h3>Create File</h3>
+                                <p>Generate new files and components</p>
+                                <button class="tool-btn">Use Tool</button>
+                            </div>
+                            <div class="tool-card" data-tool="search">
+                                <div class="tool-icon">🔎</div>
+                                <h3>Search Code</h3>
+                                <p>Find patterns in your codebase</p>
+                                <button class="tool-btn">Use Tool</button>
+                            </div>
+                            <div class="tool-card" data-tool="explain">
+                                <div class="tool-icon">💡</div>
+                                <h3>Explain Code</h3>
+                                <p>Get detailed code explanations</p>
+                                <button class="tool-btn">Use Tool</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Chains View -->
+                <div id="chains-view" class="view">
+                    <div class="chains-container">
+                        <div class="section-header">
+                            <h2>Tool Chains</h2>
+                            <button id="new-chain" class="btn-primary">Create Chain</button>
+                        </div>
+                        <div id="chains-list" class="chains-list">
+                            <!-- Tool chains will be loaded here -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Web View -->
+                <div id="web-view" class="view">
+                    <div class="web-container">
+                        <h2>Web Tools</h2>
+                        <div class="tool-grid">
+                            <div class="tool-card" data-tool="scrape">
+                                <div class="tool-icon">🌐</div>
+                                <h3>Scrape Website</h3>
+                                <p>Extract content from web pages</p>
+                                <button class="tool-btn">Use Tool</button>
+                            </div>
+                            <div class="tool-card" data-tool="extract">
+                                <div class="tool-icon">🎯</div>
+                                <h3>Extract Content</h3>
+                                <p>Use CSS selectors to extract data</p>
+                                <button class="tool-btn">Use Tool</button>
+                            </div>
+                            <div class="tool-card" data-tool="crawl">
+                                <div class="tool-icon">🕷️</div>
+                                <h3>Crawl Website</h3>
+                                <p>Follow links and crawl multiple pages</p>
+                                <button class="tool-btn">Use Tool</button>
+                            </div>
+                            <div class="tool-card" data-tool="analyze-web">
+                                <div class="tool-icon">📊</div>
+                                <h3>Analyze Website</h3>
+                                <p>AI-powered web content analysis</p>
+                                <button class="tool-btn">Use Tool</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Project Builder View -->
+                <div id="builder-view" class="view">
+                    <div class="builder-container">
+                        <div class="builder-header">
+                            <h2>🏗️ AI Project Builder</h2>
+                            <p>Build complete applications from simple descriptions</p>
+                        </div>
+
+                        <!-- Quick Start Templates -->
+                        <div class="quick-start-section">
+                            <h3>Quick Start Templates</h3>
+                            <div class="template-grid">
+                                <div class="template-card" data-template="fullstack-app">
+                                    <div class="template-icon">🚀</div>
+                                    <h4>Full-Stack App</h4>
+                                    <p>Complete web application with frontend, backend, and database</p>
+                                </div>
+                                <div class="template-card" data-template="rest-api">
+                                    <div class="template-icon">🔧</div>
+                                    <h4>REST API</h4>
+                                    <p>Professional API with authentication and documentation</p>
+                                </div>
+                                <div class="template-card" data-template="react-app">
+                                    <div class="template-icon">⚛️</div>
+                                    <h4>React App</h4>
+                                    <p>Modern React application with routing and state management</p>
+                                </div>
+                                <div class="template-card" data-template="ecommerce">
+                                    <div class="template-icon">🛒</div>
+                                    <h4>E-commerce</h4>
+                                    <p>Online store with payment processing and admin panel</p>
+                                </div>
+                                <div class="template-card" data-template="chat-app">
+                                    <div class="template-icon">💬</div>
+                                    <h4>Chat App</h4>
+                                    <p>Real-time chat with Socket.io and file sharing</p>
+                                </div>
+                                <div class="template-card" data-template="saas-platform">
+                                    <div class="template-icon">🏢</div>
+                                    <h4>SaaS Platform</h4>
+                                    <p>Enterprise SaaS with billing, multi-tenancy, and analytics</p>
+                                </div>
+                                <div class="template-card" data-template="mobile-app">
+                                    <div class="template-icon">📱</div>
+                                    <h4>Mobile App</h4>
+                                    <p>React Native cross-platform mobile application</p>
+                                </div>
+                                <div class="template-card" data-template="ai-ml-platform">
+                                    <div class="template-icon">🧠</div>
+                                    <h4>AI/ML Platform</h4>
+                                    <p>Machine learning platform with training pipelines</p>
+                                </div>
+                                <div class="template-card" data-template="blockchain-web3">
+                                    <div class="template-icon">⛓️</div>
+                                    <h4>Blockchain/Web3</h4>
+                                    <p>Smart contracts, DeFi features, and NFT support</p>
+                                </div>
+                                <div class="template-card" data-template="devops-platform">
+                                    <div class="template-icon">⚙️</div>
+                                    <h4>DevOps Platform</h4>
+                                    <p>CI/CD pipelines with monitoring and deployment</p>
+                                </div>
+                                <div class="template-card" data-template="iot-platform">
+                                    <div class="template-icon">🌐</div>
+                                    <h4>IoT Platform</h4>
+                                    <p>Device management with real-time data processing</p>
+                                </div>
+                                <div class="template-card" data-template="microservices">
+                                    <div class="template-icon">🔧</div>
+                                    <h4>Microservices</h4>
+                                    <p>Service mesh architecture with distributed tracing</p>
+                                </div>
+                                <div class="template-card" data-template="custom">
+                                    <div class="template-icon">✨</div>
+                                    <h4>Custom Project</h4>
+                                    <p>Describe your project and I'll build it for you</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Project Configuration -->
+                        <div id="project-config" class="project-config" style="display: none;">
+                            <div class="config-form">
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label for="project-name">Project Name *</label>
+                                        <input type="text" id="project-name" placeholder="Enter project name" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="project-type">Project Type</label>
+                                        <select id="project-type">
+                                            <option value="webapp">Web Application</option>
+                                            <option value="api">REST API</option>
+                                            <option value="frontend">Frontend Only</option>
+                                            <option value="mobile">Mobile App</option>
+                                            <option value="desktop">Desktop App</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="project-description">Project Description *</label>
+                                    <textarea id="project-description" placeholder="Describe what you want to build..." rows="3" required></textarea>
+                                </div>
+
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label for="tech-stack">Technology Preference</label>
+                                        <select id="tech-stack">
+                                            <option value="modern">Modern Stack (Latest versions)</option>
+                                            <option value="stable">Stable Stack (LTS versions)</option>
+                                            <option value="minimal">Minimal Dependencies</option>
+                                            <option value="enterprise">Enterprise Ready</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="deployment-target">Deployment Target</label>
+                                        <select id="deployment-target">
+                                            <option value="local">Local Development</option>
+                                            <option value="cloud">Cloud Platform</option>
+                                            <option value="docker">Docker Container</option>
+                                            <option value="serverless">Serverless</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <!-- Features Selection -->
+                                <div class="form-group">
+                                    <label>Features to Include</label>
+                                    <div class="feature-checkboxes">
+                                        <label><input type="checkbox" name="features" value="auth"> 🔐 Authentication</label>
+                                        <label><input type="checkbox" name="features" value="database"> 🗄️ Database</label>
+                                        <label><input type="checkbox" name="features" value="api"> 🔗 REST API</label>
+                                        <label><input type="checkbox" name="features" value="realtime"> ⚡ Real-time Features</label>
+                                        <label><input type="checkbox" name="features" value="payments"> 💳 Payment Processing</label>
+                                        <label><input type="checkbox" name="features" value="testing"> 🧪 Testing Suite</label>
+                                        <label><input type="checkbox" name="features" value="docs"> 📚 Documentation</label>
+                                        <label><input type="checkbox" name="features" value="docker"> 🐳 Docker Setup</label>
+                                        <label><input type="checkbox" name="features" value="ci-cd"> 🚀 CI/CD Pipeline</label>
+                                    </div>
+                                </div>
+
+                                <!-- Advanced Options -->
+                                <div class="advanced-section">
+                                    <button type="button" id="toggle-advanced" class="toggle-btn">
+                                        <span>Advanced Options</span>
+                                        <span class="chevron">▼</span>
+                                    </button>
+                                    <div id="advanced-options" class="advanced-options" style="display: none;">
+                                        <div class="form-row">
+                                            <div class="form-group">
+                                                <label for="ai-provider">AI Model</label>
+                                                <select id="ai-provider">
+                                                    <option value="openai">🚀 OpenAI GPT-4 (Cloud - Most Capable)</option>
+                                                    <option value="openai-mini">⚡ OpenAI GPT-4o-mini (Cloud - Fast & Cost-effective)</option>
+                                                    <option value="anthropic">🧠 Anthropic Claude-3 (Cloud - Excellent Reasoning)</option>
+                                                    <option value="ollama">🔒 Local Ollama (Private - No API costs)</option>
+                                                </select>
+                                                <small class="form-help">
+                                                    💡 <strong>Tip:</strong> Use Local Ollama for privacy and no API costs. Requires <a href="https://ollama.ai" target="_blank">Ollama installation</a>.
+                                                </small>
+                                            </div>
+                                            <div class="form-group">
+                                                <label for="code-style">Code Style</label>
+                                                <select id="code-style">
+                                                    <option value="standard">Standard</option>
+                                                    <option value="airbnb">Airbnb</option>
+                                                    <option value="google">Google</option>
+                                                    <option value="prettier">Prettier</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label>
+                                                <input type="checkbox" id="explain-mode">
+                                                📖 Explain as you build (Educational mode)
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Action Buttons -->
+                                <div class="builder-actions">
+                                    <button type="button" id="preview-plan" class="btn-secondary">
+                                        👁️ Preview Build Plan
+                                    </button>
+                                    <button type="button" id="start-build" class="btn-primary">
+                                        🚀 Start Building
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Build Progress -->
+                        <div id="build-progress" class="build-progress" style="display: none;">
+                            <div class="progress-header">
+                                <h3>Building Your Project...</h3>
+                                <div class="progress-bar">
+                                    <div class="progress-fill" style="width: 0%"></div>
+                                </div>
+                                <div class="progress-info">
+                                    <span id="progress-step">Initializing...</span>
+                                    <span id="progress-percent">0%</span>
+                                </div>
+                            </div>
+                            
+                            <div class="build-log">
+                                <div class="log-header">
+                                    <h4>Build Log</h4>
+                                    <button id="toggle-log" class="toggle-btn">Show Details</button>
+                                </div>
+                                <div id="build-log-content" class="log-content" style="display: none;">
+                                    <!-- Build steps will appear here -->
+                                </div>
+                            </div>
+
+                            <!-- Explanation Panel (if enabled) -->
+                            <div id="build-explanation" class="build-explanation" style="display: none;">
+                                <h4>📖 What I'm Building</h4>
+                                <div id="explanation-content">
+                                    <!-- AI explanations will appear here -->
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Build Results -->
+                        <div id="build-results" class="build-results" style="display: none;">
+                            <div class="results-header">
+                                <h3>✅ Project Built Successfully!</h3>
+                            </div>
+                            <div id="results-content" class="results-content">
+                                <!-- Results will be populated here -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Memory View -->
+                <div id="memory-view" class="view">
+                    <div class="memory-container">
+                        <h2>Memory & Knowledge</h2>
+                        <div class="memory-tabs">
+                            <button class="tab-btn active" data-tab="knowledge">Knowledge Base</button>
+                            <button class="tab-btn" data-tab="conversations">Conversations</button>
+                            <button class="tab-btn" data-tab="code-context">Code Context</button>
+                        </div>
+                        <div class="tab-content">
+                            <div id="knowledge-tab" class="tab-panel active">
+                                <div class="search-bar">
+                                    <input type="text" id="knowledge-search" placeholder="Search knowledge base...">
+                                    <button id="add-knowledge" class="btn-secondary">Add Knowledge</button>
+                                </div>
+                                <div id="knowledge-results" class="knowledge-list">
+                                    <!-- Knowledge items will be loaded here -->
+                                </div>
+                            </div>
+                            <div id="conversations-tab" class="tab-panel">
+                                <div id="conversation-history" class="conversation-history">
+                                    <!-- Conversation history will be loaded here -->
+                                </div>
+                            </div>
+                            <div id="code-context-tab" class="tab-panel">
+                                <div id="code-context-list" class="code-context-list">
+                                    <!-- Code context will be loaded here -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Files View -->
+                <div id="files-view" class="view">
+                    <div class="files-container">
+                        <div class="file-explorer">
+                            <div class="file-toolbar">
+                                <button id="refresh-files" class="icon-btn" title="Refresh">🔄</button>
+                                <button id="new-file" class="icon-btn" title="New File">🆕</button>
+                                <button id="rename-file" class="icon-btn" title="Rename">✏️</button>
+                                <button id="delete-file" class="icon-btn" title="Delete Selected">🗑️</button>
+                                <span id="current-path" class="current-path">.</span>
+                            </div>
+                            <div id="file-tree" class="file-tree">
+                                <!-- File tree will be loaded here -->
+                            </div>
+                        </div>
+                        <div class="file-content">
+                            <div id="file-viewer" class="file-viewer">
+                                <div class="no-file-selected">
+                                    <p>Select a file to view its contents</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Jobs View -->
+                <div id="jobs-view" class="view">
+                    <div class="jobs-container">
+                        <div class="section-header">
+                            <h2>Background Jobs</h2>
+                            <button id="refresh-jobs" class="btn-secondary">Refresh</button>
+                        </div>
+                        <div id="jobs-list" class="jobs-list">
+                            <!-- Jobs will be listed here -->
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- Modals and Overlays -->
+    <div id="modal-overlay" class="modal-overlay">
+        <div id="modal-content" class="modal-content">
+            <!-- Modal content will be loaded here -->
+        </div>
+    </div>
+
+    <!-- Loading Indicator -->
+    <div id="loading-indicator" class="loading-indicator">
+        <div class="spinner"></div>
+        <p>Processing...</p>
+    </div>
+
+    <!-- Toast Notifications -->
+    <div id="toast-container" class="toast-container"></div>
+
+    <!-- Scripts -->
+    <script src="/socket.io/socket.io.js"></script>
+    <!-- Prism for syntax highlighting (from CDN) -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1/themes/prism.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/prismjs@1/components/prism-core.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/prismjs@1/components/prism-markup.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/prismjs@1/components/prism-clike.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/prismjs@1/components/prism-javascript.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/prismjs@1/components/prism-typescript.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/prismjs@1/components/prism-python.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/prismjs@1/components/prism-json.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/prismjs@1/components/prism-css.min.js"></script>
+    <script src="/js/app.js"></script>
+    <script src="/js/chat.js"></script>
+    <script src="/js/tools.js"></script>
+    <script src="/js/chains.js"></script>
+    <script src="/js/memory.js"></script>
+    <script src="/js/files.js"></script>
+    <script src="/js/builder.js"></script>
+    <script src="/js/jobs.js"></script>
+    <!-- Monaco editor (optional) -->
+    <script src="https://cdn.jsdelivr.net/npm/monaco-editor@0.45.0/min/vs/loader.js"></script>
+    <script>
+      if (window.require) {
+        window.require.config({ paths: { 'vs': 'https://cdn.jsdelivr.net/npm/monaco-editor@0.45.0/min/vs' } });
+      }
+    </script>
+</body>
+</html>

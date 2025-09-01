@@ -6,11 +6,13 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import { CodingAgent } from './agent.js';
 import { ToolChainManager } from './tool-chains.js';
+import { CompetitiveEdgeSystem } from './competitive-edge-features.js';
+import { EnterpriseRevenueOptimizer } from './enterprise-revenue-optimizer.js';
 // MemoryManager is managed via agent to centralize init
 import { applySecurity } from './security.js';
-import { Schemas, validateWithSchema } from './validation.js';
+import { schemas, validateInput } from './validation.js';
 import { installMetrics } from './metrics.js';
-import { installLogger } from './logger.js';
+import { Logger } from './logger.js';
 import { installAuth, requireRole } from './auth.js';
 import { installPolicy } from './policy.js';
 import { ensureLicenseOrExit, validateLicenseEnv } from './license.js';
@@ -37,6 +39,8 @@ class WebServer {
     
     this.agent = new CodingAgent();
     this.toolChainManager = new ToolChainManager();
+    this.competitiveEdgeSystem = new CompetitiveEdgeSystem();
+    this.revenueOptimizer = new EnterpriseRevenueOptimizer();
     this.memoryManager = this.agent.memoryManager;
     this.initialized = false;
     this.jobs = new Map();
@@ -57,7 +61,7 @@ class WebServer {
   }
 
   setupMiddleware() {
-    installLogger(this.app);
+    // Logger initialized individually if needed
     this.app.use(cors());
     this.app.use(express.json({ limit: '10mb' }));
     this.app.use(express.urlencoded({ extended: true }));
@@ -94,7 +98,7 @@ class WebServer {
     // Agent operations
     this.app.post('/api/agent/analyze', async (req, res) => {
       try {
-        const { ok, errors } = validateWithSchema(Schemas.analyze, req.body || {});
+        const { ok, errors } = validateInput(schemas.analyze, req.body || {});
         if (!ok) return res.status(400).json({ error: errors.join('; ') });
         const { target } = req.body;
         const result = await this.agent.analyzeCode(target);
@@ -106,7 +110,7 @@ class WebServer {
 
     this.app.post('/api/agent/modify', async (req, res) => {
       try {
-        const { ok, errors } = validateWithSchema(Schemas.modify, req.body || {});
+        const { ok, errors } = validateInput(schemas.modify, req.body || {});
         if (!ok) return res.status(400).json({ error: errors.join('; ') });
         const { target, instructions } = req.body;
         const result = await this.agent.modifyCode(target, instructions);
@@ -769,6 +773,43 @@ class WebServer {
         return res.json(payload);
       } catch (error) {
         return res.status(500).json({ status: 'error', error: error.message });
+      }
+    });
+
+    // COMPETITIVE EDGE API ROUTES
+    this.app.get('/api/competitive-edge/status', async (req, res) => {
+      try {
+        const status = this.competitiveEdgeSystem.getCompetitiveEdgeStatus();
+        res.json(status);
+      } catch (error) {
+        res.status(500).json({ error: error.message });
+      }
+    });
+
+    this.app.get('/api/revenue/optimization-status', async (req, res) => {
+      try {
+        const status = this.revenueOptimizer.getRevenueOptimizationStatus();
+        res.json(status);
+      } catch (error) {
+        res.status(500).json({ error: error.message });
+      }
+    });
+
+    this.app.post('/api/competitive-edge/initialize', async (req, res) => {
+      try {
+        const result = await this.competitiveEdgeSystem.initializeAllFeatures();
+        res.json(result);
+      } catch (error) {
+        res.status(500).json({ error: error.message, success: false });
+      }
+    });
+
+    this.app.post('/api/revenue/optimize', async (req, res) => {
+      try {
+        const result = await this.revenueOptimizer.initializeRevenueOptimization();
+        res.json(result);
+      } catch (error) {
+        res.status(500).json({ error: error.message, success: false });
       }
     });
 
@@ -1720,7 +1761,7 @@ class WebServer {
 
     this.app.post('/api/file', requireRole('editor','admin'), async (req, res) => {
       try {
-        const { ok, errors } = validateWithSchema(Schemas.fileCreate, req.body || {});
+        const { ok, errors } = validateInput(schemas.fileCreate, req.body || {});
         if (!ok) return res.status(400).json({ error: errors.join('; ') });
         const { path: filePath, content } = req.body;
         if (!filePath) return res.status(400).json({ error: 'path is required' });
@@ -1734,7 +1775,7 @@ class WebServer {
 
     this.app.post('/api/file/delete', requireRole('editor','admin'), async (req, res) => {
       try {
-        const { ok, errors } = validateWithSchema(Schemas.fileDelete, req.body || {});
+        const { ok, errors } = validateInput(schemas.fileDelete, req.body || {});
         if (!ok) return res.status(400).json({ error: errors.join('; ') });
         const { path: filePath } = req.body;
         if (!filePath) return res.status(400).json({ error: 'path is required' });
@@ -1748,7 +1789,7 @@ class WebServer {
 
     this.app.post('/api/file/move', requireRole('editor','admin'), async (req, res) => {
       try {
-        const { ok, errors } = validateWithSchema(Schemas.fileMove, req.body || {});
+        const { ok, errors } = validateInput(schemas.fileMove, req.body || {});
         if (!ok) return res.status(400).json({ error: errors.join('; ') });
         const { from, to } = req.body;
         if (!from || !to) return res.status(400).json({ error: 'from and to are required' });
@@ -1824,10 +1865,27 @@ class WebServer {
     console.log('Web server initialized successfully');
   }
 
-  start() {
+  async start() {
+    // Initialize competitive edge features
+    console.log('\n🚀 Initializing Lecheyne AI Competitive Edge Systems...');
+    
+    try {
+      await Promise.all([
+        this.competitiveEdgeSystem.initializeAllFeatures(),
+        this.revenueOptimizer.initializeRevenueOptimization()
+      ]);
+    } catch (error) {
+      console.warn('⚠️ Some competitive features may be limited:', error.message);
+    }
+
     this.server.listen(this.port, () => {
-      console.log(`🌐 AI Coding Agent Web UI running on http://localhost:${this.port}`);
-      console.log(`📡 Socket.IO server ready for real-time communication`);
+      console.log(`\n🚀 LECHEYNE AI - Enterprise Development Platform`);
+      console.log(`🌐 Web UI: http://localhost:${this.port}`);
+      console.log(`📡 Socket.IO: Real-time collaboration ready`);
+      console.log(`🇦🇺 Made in Melbourne with enterprise-grade intelligence`);
+      console.log(`💡 Multi-agent system: ACTIVE`);
+      console.log(`⚡ Performance optimization: ENABLED`);
+      console.log(`💰 Revenue optimization: ACTIVE`);
     });
   }
 

@@ -4,6 +4,7 @@ import { AIProvider } from './ai-provider.js';
 import { CommandParser } from './command-parser.js';
 import { CodeAnalyzer } from './code-analyzer.js';
 import { WebScraper } from './web-scraper.js';
+import { CompetitiveEdgeSystem } from './competitive-edge-features.js';
 
 export {
   CodingAgent,
@@ -11,7 +12,8 @@ export {
   AIProvider,
   CommandParser,
   CodeAnalyzer,
-  WebScraper
+  WebScraper,
+  CompetitiveEdgeSystem
 };
 
 export default CodingAgent;

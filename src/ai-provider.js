@@ -12,10 +12,26 @@ export class AIProvider {
       model: config.model || this.getDefaultModel(config.aiProvider || 'openai'),
       maxTokens: config.maxTokens || 4000,
       temperature: config.temperature || 0.1,
+      maxRetries: 3,
+      retryDelay: 1000,
+      timeout: 30000,
       ...config
     };
+    this.retryCount = 0;
 
     this.initializeProvider();
+  }
+
+  async retryWithBackoff(fn, maxRetries = this.config.maxRetries) {
+    for (let i = 0; i < maxRetries; i++) {
+      try {
+        return await fn();
+      } catch (error) {
+        if (i === maxRetries - 1) throw error;
+        const delay = this.config.retryDelay * Math.pow(2, i);
+        await new Promise(resolve => setTimeout(resolve, delay));
+      }
+    }
   }
 
   getDefaultModel(provider) {

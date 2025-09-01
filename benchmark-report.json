@@ -1,0 +1,219 @@
+{
+  "timestamp": "2025-08-30T12:56:16.335Z",
+  "duration": 11808,
+  "system": {
+    "node": "v20.19.2",
+    "platform": "linux",
+    "arch": "x64",
+    "cpus": 8,
+    "memory": "8GB",
+    "uptime": "60h"
+  },
+  "results": [
+    {
+      "category": "Core Performance",
+      "tests": [
+        {
+          "name": "String Processing",
+          "status": "passed",
+          "duration": 118.66,
+          "result": 1788890,
+          "memory": {
+            "heapUsed": 11226016,
+            "heapTotal": 19398656
+          }
+        },
+        {
+          "name": "Array Processing",
+          "status": "passed",
+          "duration": 60.59,
+          "result": 3333366666,
+          "memory": {
+            "heapUsed": 2565016,
+            "heapTotal": 2080768
+          }
+        },
+        {
+          "name": "Object Manipulation",
+          "status": "passed",
+          "duration": 74.01,
+          "result": 25000,
+          "memory": {
+            "heapUsed": -773280,
+            "heapTotal": -151552
+          }
+        },
+        {
+          "name": "JSON Processing",
+          "status": "passed",
+          "duration": 72.11,
+          "result": 10000,
+          "memory": {
+            "heapUsed": -8371048,
+            "heapTotal": 13090816
+          }
+        }
+      ]
+    },
+    {
+      "category": "AI Processing",
+      "tests": [
+        {
+          "name": "AI Tests",
+          "status": "skipped",
+          "error": "A class may only have one constructor"
+        }
+      ]
+    },
+    {
+      "category": "Memory Performance",
+      "tests": [
+        {
+          "name": "Memory Allocation",
+          "status": "passed",
+          "duration": 19.75,
+          "result": 1000,
+          "memory": {
+            "heapUsed": 8318376,
+            "heapTotal": 0
+          }
+        },
+        {
+          "name": "Memory Cleanup",
+          "status": "passed",
+          "duration": 334.81,
+          "result": 1,
+          "memory": {
+            "heapUsed": 74743808,
+            "heapTotal": 87781376
+          }
+        }
+      ]
+    },
+    {
+      "category": "I/O Performance",
+      "tests": [
+        {
+          "name": "File Write",
+          "status": "passed",
+          "duration": 140.24,
+          "result": 100,
+          "memory": {
+            "heapUsed": 3123968,
+            "heapTotal": 262144
+          }
+        },
+        {
+          "name": "File Read",
+          "status": "passed",
+          "duration": 149.33,
+          "result": 100,
+          "memory": {
+            "heapUsed": 4209992,
+            "heapTotal": 262144
+          }
+        },
+        {
+          "name": "Directory Operations",
+          "status": "passed",
+          "duration": 202.86,
+          "result": 100,
+          "memory": {
+            "heapUsed": 3222384,
+            "heapTotal": 524288
+          }
+        }
+      ]
+    },
+    {
+      "category": "Concurrency",
+      "tests": [
+        {
+          "name": "Parallel Processing",
+          "status": "passed",
+          "duration": 443.01,
+          "result": 50,
+          "memory": {
+            "heapUsed": -6584664,
+            "heapTotal": 1048576
+          }
+        },
+        {
+          "name": "Sequential Processing",
+          "status": "passed",
+          "duration": 9927.27,
+          "result": 50,
+          "memory": {
+            "heapUsed": 10774952,
+            "heapTotal": 1572864
+          }
+        },
+        {
+          "name": "Race Condition Handling",
+          "status": "passed",
+          "duration": 10.87,
+          "result": 100,
+          "memory": {
+            "heapUsed": 106144,
+            "heapTotal": 0
+          }
+        }
+      ]
+    }
+  ],
+  "metrics": {
+    "memory": [
+      {
+        "initial": {
+          "rss": 80003072,
+          "heapTotal": 43245568,
+          "heapUsed": 11772424,
+          "external": 2258175,
+          "arrayBuffers": 569275
+        },
+        "final": {
+          "rss": 169558016,
+          "heapTotal": 131026944,
+          "heapUsed": 94840512,
+          "external": 2127643,
+          "arrayBuffers": 438743
+        },
+        "difference": {
+          "heapUsed": 83068088,
+          "heapTotal": 87781376,
+          "external": -130532
+        }
+      }
+    ],
+    "cpu": [],
+    "io": [],
+    "network": []
+  },
+  "summary": {
+    "totalTests": 13,
+    "passed": 12,
+    "failed": 0,
+    "skipped": 1,
+    "averageTime": 962.79,
+    "slowestTest": {
+      "name": "Sequential Processing",
+      "status": "passed",
+      "duration": 9927.27,
+      "result": 50,
+      "memory": {
+        "heapUsed": 10774952,
+        "heapTotal": 1572864
+      }
+    },
+    "fastestTest": {
+      "name": "Race Condition Handling",
+      "status": "passed",
+      "duration": 10.87,
+      "result": 100,
+      "memory": {
+        "heapUsed": 106144,
+        "heapTotal": 0
+      }
+    }
+  }
+}

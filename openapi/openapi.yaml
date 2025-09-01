@@ -1,7 +1,15 @@
 openapi: 3.0.3
 info:
-  title: AI Coding Agent API
-  version: 0.1.0
+  title: Lecheyne AI - Enterprise Development Platform API
+  version: 2.0.0
+  description: Revolutionary multi-agent AI platform for enterprise development teams
+  contact:
+    name: Lecheyne AI Support
+    email: sticky.pty.ltd@gmail.com
+    url: https://lecheyne.ai
+  license:
+    name: Enterprise License
+    url: https://lecheyne.ai/license
 servers:
   - url: http://localhost:3000
 paths:

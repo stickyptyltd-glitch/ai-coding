@@ -1,27 +1,39 @@
-import { v4 as uuidv4 } from 'uuid';
 
-export function installLogger(app) {
-  app.use((req, res, next) => {
-    const start = Date.now();
-    req.id = req.headers['x-request-id'] || uuidv4();
-    res.setHeader('x-request-id', req.id);
-    const done = () => {
-      res.removeListener('finish', done);
-      res.removeListener('close', done);
-      const log = {
-        type: 'request',
-        id: req.id,
-        ts: new Date().toISOString(),
-        method: req.method,
-        path: req.path,
-        status: res.statusCode,
-        ms: Date.now() - start
-      };
-      console.log(JSON.stringify(log));
-    };
-    res.on('finish', done);
-    res.on('close', done);
-    next();
-  });
+import chalk from 'chalk';
+
+// Advanced logging system
+export class Logger {
+  constructor(name) {
+    this.name = name;
+    this.level = process.env.LOG_LEVEL || 'info';
+  }
+  
+  debug(message, ...args) {
+    if (this.shouldLog('debug')) {
+      console.log(chalk.gray(`[${this.name}] DEBUG: ${message}`), ...args);
+    }
+  }
+  
+  info(message, ...args) {
+    if (this.shouldLog('info')) {
+      console.log(chalk.blue(`[${this.name}] INFO: ${message}`), ...args);
+    }
+  }
+  
+  warn(message, ...args) {
+    if (this.shouldLog('warn')) {
+      console.warn(chalk.yellow(`[${this.name}] WARN: ${message}`), ...args);
+    }
+  }
+  
+  error(message, ...args) {
+    if (this.shouldLog('error')) {
+      console.error(chalk.red(`[${this.name}] ERROR: ${message}`), ...args);
+    }
+  }
+  
+  shouldLog(level) {
+    const levels = ['debug', 'info', 'warn', 'error'];
+    return levels.indexOf(level) >= levels.indexOf(this.level);
+  }
 }
-
