@@ -1,20 +1,25 @@
 import chalk from 'chalk';
 import { EventEmitter } from 'events';
 import { AIProvider } from './ai-provider.js';
+import { AgentRegistry } from './orchestration/agent-registry.js';
+import { ExecutionStrategies } from './orchestration/execution-strategies.js';
+import { ConsensusEngine } from './orchestration/consensus-engine.js';
+import { CollaborativeSessionManager } from './orchestration/collaborative-sessions.js';
+import { AdaptiveTaskRouter } from './orchestration/adaptive-task-router.js';
 
 // Advanced AI Orchestration System with Multi-Agent Coordination
 export class AdvancedAIOrchestration extends EventEmitter {
   constructor() {
     super();
-    this.agents = new Map();
+    this.agentRegistry = new AgentRegistry();
+    this.executionStrategies = new ExecutionStrategies(this.agentRegistry);
+    this.consensusEngine = new ConsensusEngine();
+    this.collaborativeSessionManager = new CollaborativeSessionManager(this.agentRegistry);
+    this.adaptiveRouter = new AdaptiveTaskRouter(this.agentRegistry);
     this.taskQueue = [];
     this.activeExecutions = new Map();
-    this.agentPerformance = new Map();
-    this.collaborationSessions = new Map();
     this.knowledgeGraph = new Map();
     this.learningEngine = new LearningEngine();
-    this.consensusEngine = new ConsensusEngine();
-    this.adaptiveRouter = new AdaptiveTaskRouter();
     
     this.config = {
       maxConcurrentTasks: 10,
@@ -39,9 +44,12 @@ export class AdvancedAIOrchestration extends EventEmitter {
       console.log(chalk.blue('🧠 Initializing Advanced AI Orchestration...'));
       
       // Initialize core components
-      await this.learningEngine.initialize();
       await this.consensusEngine.initialize();
       await this.adaptiveRouter.initialize();
+      await this.learningEngine.initialize();
+      
+      // Set up event listeners
+      this.setupEventListeners();
       
       // Register specialized agents
       await this.registerSpecializedAgents();
@@ -149,26 +157,7 @@ export class AdvancedAIOrchestration extends EventEmitter {
   }
 
   registerAgent(id, agent) {
-    this.agents.set(id, {
-      id,
-      agent,
-      status: 'idle',
-      currentTask: null,
-      performance: {
-        tasksCompleted: 0,
-        averageTime: 0,
-        successRate: 1.0,
-        specialtyScores: new Map()
-      },
-      lastActivity: new Date()
-    });
-    
-    this.agentPerformance.set(id, {
-      responseTime: [],
-      accuracy: [],
-      resourceUsage: [],
-      collaborationScore: 1.0
-    });
+    this.agentRegistry.registerAgent(id, agent);
   }
 
   async executeTask(task) {
@@ -199,6 +188,12 @@ export class AdvancedAIOrchestration extends EventEmitter {
         case 'collaborative_session':
           result = await this.executeCollaborativeSession(taskId, task, strategy);
           break;
+        case 'parallel_execution':
+          result = await this.executeParallelExecution(taskId, task, strategy);
+          break;
+        case 'cascading_fallback':
+          result = await this.executeCascadingFallback(taskId, task, strategy);
+          break;
         default:
           throw new Error(`Unknown execution strategy: ${strategy.type}`);
       }
@@ -213,8 +208,15 @@ export class AdvancedAIOrchestration extends EventEmitter {
         await this.learningEngine.recordExecution(taskId, task, result, Date.now() - startTime);
       }
       
-      // Update metrics
+      // Update metrics and routing performance
       this.updateMetrics(taskId, task, result, Date.now() - startTime);
+      this.adaptiveRouter.recordStrategyOutcome(
+        strategy.type, 
+        taskAnalysis.domain, 
+        result.success !== false, 
+        Date.now() - startTime,
+        result
+      );
       
       console.log(chalk.green(`✅ Task completed: ${taskId}`));
       this.emit('task:completed', { taskId, task, result });
@@ -253,140 +255,39 @@ export class AdvancedAIOrchestration extends EventEmitter {
   }
 
   async executeSingleAgent(taskId, task, strategy) {
-    const agentId = strategy.agent;
-    const agentInfo = this.agents.get(agentId);
-    
-    if (!agentInfo) {
-      throw new Error(`Agent not found: ${agentId}`);
-    }
-    
-    agentInfo.status = 'busy';
-    agentInfo.currentTask = taskId;
-    
-    try {
-      const result = await this.withTimeout(
-        agentInfo.agent.execute(task),
-        this.config.agentTimeout
-      );
-      
-      agentInfo.status = 'idle';
-      agentInfo.currentTask = null;
-      agentInfo.performance.tasksCompleted++;
-      
-      return result;
-    } catch (error) {
-      agentInfo.status = 'error';
-      agentInfo.currentTask = null;
-      throw error;
-    }
+    return await this.executionStrategies.executeStrategy(strategy, taskId, task, {
+      timeout: this.config.agentTimeout
+    });
   }
 
   async executeMultiAgentPipeline(taskId, task, strategy) {
-    const results = [];
-    let currentInput = task;
-    
-    for (const agentId of strategy.pipeline) {
-      const agentInfo = this.agents.get(agentId);
-      
-      if (!agentInfo) {
-        throw new Error(`Agent not found in pipeline: ${agentId}`);
-      }
-      
-      agentInfo.status = 'busy';
-      agentInfo.currentTask = taskId;
-      
-      try {
-        const result = await agentInfo.agent.execute(currentInput);
-        results.push({ agent: agentId, result });
-        
-        // Pass result to next agent in pipeline
-        currentInput = { ...task, previousResult: result };
-        
-        agentInfo.status = 'idle';
-        agentInfo.currentTask = null;
-        agentInfo.performance.tasksCompleted++;
-        
-      } catch (error) {
-        agentInfo.status = 'error';
-        agentInfo.currentTask = null;
-        throw new Error(`Pipeline failed at agent ${agentId}: ${error.message}`);
-      }
-    }
-    
-    return {
-      type: 'pipeline_result',
-      steps: results,
-      finalResult: results[results.length - 1].result
-    };
+    return await this.executionStrategies.executeStrategy(strategy, taskId, task, {
+      stepTimeout: this.config.agentTimeout / 2
+    });
   }
 
   async executeConsensusEnsemble(taskId, task, strategy) {
-    const agentResults = [];
-    const promises = [];
+    const strategyResult = await this.executionStrategies.executeStrategy(strategy, taskId, task, {
+      agentTimeout: this.config.agentTimeout
+    });
     
-    // Execute task with multiple agents in parallel
-    for (const agentId of strategy.agents) {
-      const agentInfo = this.agents.get(agentId);
-      
-      if (!agentInfo) {
-        console.warn(chalk.yellow(`Agent not found: ${agentId}`));
-        continue;
-      }
-      
-      agentInfo.status = 'busy';
-      agentInfo.currentTask = taskId;
-      
-      const promise = agentInfo.agent.execute(task)
-        .then(result => {
-          agentInfo.status = 'idle';
-          agentInfo.currentTask = null;
-          agentInfo.performance.tasksCompleted++;
-          return { agent: agentId, result };
-        })
-        .catch(error => {
-          agentInfo.status = 'error';
-          agentInfo.currentTask = null;
-          return { agent: agentId, error: error.message };
-        });
-      
-      promises.push(promise);
+    if (strategyResult.type === 'consensus_result' && strategyResult.successfulResults) {
+      const consensus = await this.consensusEngine.buildConsensus(strategyResult.successfulResults);
+      return {
+        ...strategyResult,
+        consensus,
+        confidence: consensus.confidence
+      };
     }
     
-    // Wait for all agents to complete
-    const results = await Promise.all(promises);
-    
-    // Filter successful results
-    const successfulResults = results.filter(r => !r.error);
-    
-    if (successfulResults.length === 0) {
-      throw new Error('All agents failed in consensus ensemble');
-    }
-    
-    // Apply consensus algorithm
-    const consensus = await this.consensusEngine.buildConsensus(successfulResults);
-    
-    return {
-      type: 'consensus_result',
-      consensus,
-      individualResults: results,
-      confidence: consensus.confidence
-    };
+    return strategyResult;
   }
 
   async executeCollaborativeSession(taskId, task, strategy) {
-    const sessionId = this.generateSessionId();
-    const session = new CollaborativeSession(sessionId, strategy.agents, task);
-    
-    this.collaborationSessions.set(sessionId, session);
-    
-    try {
-      const result = await session.execute();
-      this.collaborationSessions.delete(sessionId);
-      return result;
-    } catch (error) {
-      this.collaborationSessions.delete(sessionId);
-      throw error;
-    }
+    return await this.collaborativeSessionManager.executeSession(taskId, strategy.agents, task, {
+      maxIterations: this.config.maxIterations || 10,
+      sessionTimeout: this.config.sessionTimeout || 600000
+    });
   }
 
   async applyQualityGating(result, task) {
@@ -500,11 +401,47 @@ export class AdvancedAIOrchestration extends EventEmitter {
 
   getBestAgentForTask(task) {
     const domain = this.identifyDomain(task);
-    const candidates = Array.from(this.agents.values())
-      .filter(a => a.agent.specialties?.includes(domain))
-      .sort((a, b) => b.performance.successRate - a.performance.successRate);
+    return this.agentRegistry.getBestAgentForTask({ ...task, domain });
+  }
+  
+  async executeParallelExecution(taskId, task, strategy) {
+    return await this.executionStrategies.executeStrategy(strategy, taskId, task, {
+      agentTimeout: this.config.agentTimeout
+    });
+  }
+  
+  async executeCascadingFallback(taskId, task, strategy) {
+    return await this.executionStrategies.executeStrategy(strategy, taskId, task, {
+      agentTimeout: this.config.agentTimeout
+    });
+  }
+  
+  setupEventListeners() {
+    // Agent registry events
+    this.agentRegistry.on('agent:registered', (data) => {
+      this.emit('agent:registered', data);
+    });
     
-    return candidates[0] || null;
+    this.agentRegistry.on('agent:status_changed', (data) => {
+      this.emit('agent:status_changed', data);
+    });
+    
+    this.agentRegistry.on('agent:task_completed', (data) => {
+      this.emit('agent:task_completed', data);
+    });
+    
+    // Collaborative session events
+    this.collaborativeSessionManager.on('session:created', (data) => {
+      this.emit('collaboration:session_created', data);
+    });
+    
+    this.collaborativeSessionManager.on('session:convergence', (data) => {
+      this.emit('collaboration:convergence', data);
+    });
+    
+    this.collaborativeSessionManager.on('session:error', (data) => {
+      this.emit('collaboration:error', data);
+    });
   }
 
   updateMetrics(taskId, task, result, duration) {
@@ -528,7 +465,27 @@ export class AdvancedAIOrchestration extends EventEmitter {
   startPerformanceMonitoring() {
     setInterval(() => {
       this.monitorAgentPerformance();
-    }, 30000);
+    }, 30000); // Monitor every 30 seconds
+    
+    // Additional periodic maintenance
+    setInterval(() => {
+      this.performMaintenanceTasks();
+    }, 300000); // Maintenance every 5 minutes
+  }
+  
+  performMaintenanceTasks() {
+    console.log(chalk.blue('🔧 Performing maintenance tasks...'));
+    
+    // Clean up old data
+    this.agentRegistry.cleanup();
+    this.collaborativeSessionManager.cleanup();
+    
+    // Optimize routing rules
+    this.adaptiveRouter.optimizeRouting();
+    
+    // Log system status
+    const metrics = this.getMetrics();
+    console.log(chalk.cyan(`📊 System status: ${metrics.agentCount} agents, ${metrics.activeExecutions} active executions, ${metrics.queueLength} queued tasks`));
   }
 
   startLearningCycle() {
@@ -558,17 +515,21 @@ export class AdvancedAIOrchestration extends EventEmitter {
   }
 
   monitorAgentPerformance() {
-    for (const [agentId, agentInfo] of this.agents) {
-      const performance = this.agentPerformance.get(agentId);
-      
-      // Calculate utilization
+    const agentStatus = this.agentRegistry.getRegistryStatus();
+    
+    // Update metrics based on agent status
+    for (const [agentId, agentInfo] of Object.entries(agentStatus.agents)) {
       const utilization = agentInfo.status === 'busy' ? 1.0 : 0.0;
       this.metrics.agentUtilization.set(agentId, utilization);
-      
-      // Update last activity
-      if (agentInfo.status === 'busy') {
-        agentInfo.lastActivity = new Date();
-      }
+    }
+    
+    // Cleanup stale agents and sessions
+    this.agentRegistry.cleanup();
+    this.collaborativeSessionManager.cleanup();
+    
+    // Optimize routing based on performance
+    if (Math.random() < 0.1) { // 10% chance to optimize on each monitoring cycle
+      this.adaptiveRouter.optimizeRouting();
     }
   }
 
@@ -591,17 +552,7 @@ export class AdvancedAIOrchestration extends EventEmitter {
 
   // Public API methods
   getAgentStatus() {
-    return Object.fromEntries(
-      Array.from(this.agents.entries()).map(([id, info]) => [
-        id,
-        {
-          status: info.status,
-          currentTask: info.currentTask,
-          performance: info.performance,
-          lastActivity: info.lastActivity
-        }
-      ])
-    );
+    return this.agentRegistry.getRegistryStatus();
   }
 
   getMetrics() {
@@ -609,7 +560,11 @@ export class AdvancedAIOrchestration extends EventEmitter {
       ...this.metrics,
       activeExecutions: this.activeExecutions.size,
       queueLength: this.taskQueue.length,
-      agentCount: this.agents.size
+      agentCount: this.agentRegistry.getAllAgents().length,
+      agentRegistry: this.agentRegistry.getPerformanceMetrics(),
+      collaborativeSessions: this.collaborativeSessionManager.getSessionMetrics(),
+      consensusEngine: this.consensusEngine.getConsensusMetrics(),
+      routing: this.adaptiveRouter.getRoutingStatistics()
     };
   }
 
@@ -625,12 +580,17 @@ export class AdvancedAIOrchestration extends EventEmitter {
       execution.cancel?.();
     }
     
-    // Close collaboration sessions
-    for (const session of this.collaborationSessions.values()) {
-      await session.close();
-    }
+    // Close all collaborative sessions
+    this.collaborativeSessionManager.closeAllSessions();
+    
+    // Clean up components
+    this.agentRegistry.cleanup();
+    
+    // Remove all event listeners
+    this.removeAllListeners();
     
     this.emit('orchestration:shutdown');
+    console.log(chalk.green('✅ AI Orchestration shutdown complete'));
   }
 }
 
@@ -1468,8 +1428,13 @@ class AdaptiveTaskRouter {
 }
 
 // Collaborative Session for multi-agent collaboration
+// Legacy CollaborativeSession class - now handled by CollaborativeSessionManager
+// This class is kept for backward compatibility but functionality has been moved to
+// src/orchestration/collaborative-sessions.js
+
 class CollaborativeSession {
   constructor(sessionId, agents, task) {
+    console.warn(chalk.yellow('⚠️ Using legacy CollaborativeSession class. Consider migrating to CollaborativeSessionManager.'));
     this.sessionId = sessionId;
     this.agents = agents;
     this.task = task;

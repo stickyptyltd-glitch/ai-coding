@@ -1,5 +1,6 @@
 import chalk from 'chalk';
 import crypto from 'crypto';
+import { sanitizeValue } from './validation.js';
 
 // Enhanced security system with enterprise features
 class EnhancedSecurityManager {
@@ -84,22 +85,30 @@ export async function applySecurity(app) {
       contentSecurityPolicy: {
         directives: {
           defaultSrc: ["'self'"],
-          scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'"],
-          styleSrc: ["'self'", "'unsafe-inline'"],
-          imgSrc: ["'self'", "data:", "https:"],
-          connectSrc: ["'self'", "ws:", "wss:"],
-          fontSrc: ["'self'"],
+          scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'", "https://cdn.socket.io"],
+          styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
+          imgSrc: ["'self'", "data:", "https:", "blob:"],
+          connectSrc: ["'self'", "ws:", "wss:", "https:"],
+          fontSrc: ["'self'", "https://fonts.gstatic.com", "data:"],
           objectSrc: ["'none'"],
           mediaSrc: ["'self'"],
-          frameSrc: ["'none'"]
+          frameSrc: ["'none'"],
+          baseUri: ["'self'"],
+          formAction: ["'self'"],
+          frameAncestors: ["'none'"],
+          upgradeInsecureRequests: process.env.NODE_ENV === 'production' ? [] : null
         }
       },
       crossOriginEmbedderPolicy: false,
-      hsts: {
+      hsts: process.env.NODE_ENV === 'production' ? {
         maxAge: 31536000,
         includeSubDomains: true,
         preload: true
-      }
+      } : false,
+      referrerPolicy: { policy: "strict-origin-when-cross-origin" },
+      noSniff: true,
+      xssFilter: true,
+      frameguard: { action: 'deny' }
     }));
     console.log(chalk.green('✅ Enhanced Helmet security headers applied'));
   } catch {
@@ -140,23 +149,110 @@ export async function applySecurity(app) {
       message: { error: 'Too many attempts, please try again later' }
     });
 
+    // Moderate rate limiting for AI agent operations (compute-intensive)
+    const agentLimiter = rateLimit({
+      windowMs: 5 * 60 * 1000, // 5 minutes
+      max: 20,
+      standardHeaders: true,
+      legacyHeaders: false,
+      message: { error: 'Too many AI operations, please wait before trying again' },
+      handler: (req, res) => {
+        securityManager.logSecurityEvent({
+          type: 'agent_rate_limit_exceeded',
+          severity: 'medium',
+          source: 'agent_rate_limiter',
+          details: { endpoint: req.path, method: req.method },
+          ipAddress: req.ip,
+          userAgent: req.get('User-Agent')
+        });
+        res.status(429).json({ error: 'Too many AI operations, please wait before trying again' });
+      }
+    });
+
+    // Chain execution rate limiting (very compute-intensive)
+    const chainLimiter = rateLimit({
+      windowMs: 10 * 60 * 1000, // 10 minutes
+      max: 10,
+      standardHeaders: true,
+      legacyHeaders: false,
+      message: { error: 'Too many chain executions, please wait before trying again' }
+    });
+
     app.use('/api/', generalLimiter);
     app.use('/api/auth/', strictLimiter);
     app.use('/api/admin/', strictLimiter);
+    app.use('/api/agent/', agentLimiter);
+    app.use('/api/chains/:id/execute', chainLimiter);
 
     console.log(chalk.green('✅ Enhanced rate limiting configured'));
   } catch {
     console.log(chalk.yellow('⚠️ Rate limiting not available'));
   }
 
+  // Request size limiting
+  app.use((req, res, next) => {
+    const contentLength = parseInt(req.headers['content-length']) || 0;
+    const maxSize = 50 * 1024 * 1024; // 50MB max
+    
+    if (contentLength > maxSize) {
+      securityManager.logSecurityEvent({
+        type: 'request_size_exceeded',
+        severity: 'medium',
+        source: 'size_limiter',
+        details: { size: contentLength, max: maxSize },
+        ipAddress: req.ip,
+        userAgent: req.get('User-Agent')
+      });
+      return res.status(413).json({ error: 'Request too large' });
+    }
+    next();
+  });
+
+  // IP-based suspicious activity detection
+  const suspiciousIPs = new Map();
+  app.use((req, res, next) => {
+    const ip = req.ip;
+    const now = Date.now();
+    const suspiciousWindow = 60 * 1000; // 1 minute
+    
+    if (!suspiciousIPs.has(ip)) {
+      suspiciousIPs.set(ip, { requests: 0, lastReset: now });
+    }
+    
+    const ipData = suspiciousIPs.get(ip);
+    
+    // Reset counter every minute
+    if (now - ipData.lastReset > suspiciousWindow) {
+      ipData.requests = 0;
+      ipData.lastReset = now;
+    }
+    
+    ipData.requests++;
+    
+    // Flag IPs making more than 200 requests per minute
+    if (ipData.requests > 200) {
+      securityManager.logSecurityEvent({
+        type: 'suspicious_activity',
+        severity: 'high',
+        source: 'ip_monitor',
+        details: { requestCount: ipData.requests },
+        ipAddress: ip,
+        userAgent: req.get('User-Agent')
+      });
+      // Don't block, just log for now
+    }
+    
+    next();
+  });
+
   // Input validation and sanitization middleware
   app.use((req, res, next) => {
     // Sanitize common injection attempts
     if (req.body) {
-      req.body = sanitizeInput(req.body);
+      req.body = sanitizeValue(req.body);
     }
     if (req.query) {
-      req.query = sanitizeInput(req.query);
+      req.query = sanitizeValue(req.query);
     }
     next();
   });

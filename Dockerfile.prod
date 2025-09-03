@@ -1,113 +1,138 @@
 # LECHEYNE AI - PRODUCTION DOCKERFILE
-# Multi-stage build for optimal production deployment
+# Ultra-optimized multi-stage build for enterprise deployment
 
-# Stage 1: Build dependencies
+# Stage 1: Dependencies and security hardening
 FROM node:20-alpine AS dependencies
+
+# Security labels
 LABEL maintainer="Sticky Pty Ltd <sticky.pty.ltd@gmail.com>"
 LABEL version="2.0.0"
 LABEL description="Lecheyne AI - Enterprise Development Platform"
+LABEL org.opencontainers.image.base.name="node:20-alpine"
+LABEL org.opencontainers.image.security.policy="https://github.com/lecheyne-ai/security-policy"
 
 WORKDIR /app
 
-# Install build dependencies
-RUN apk add --no-cache \
-    python3 \
-    make \
-    g++ \
-    cairo-dev \
-    jpeg-dev \
-    pango-dev \
-    musl-dev \
-    giflib-dev \
-    pixman-dev \
-    pangomm-dev \
-    libjpeg-turbo-dev \
-    freetype-dev
+# Security: Update packages and remove cache
+RUN apk update --no-cache && \
+    apk upgrade --no-cache && \
+    apk add --no-cache --virtual .build-deps \
+        python3 \
+        make \
+        g++ \
+        cairo-dev \
+        jpeg-dev \
+        pango-dev \
+        musl-dev \
+        giflib-dev \
+        pixman-dev \
+        pangomm-dev \
+        libjpeg-turbo-dev \
+        freetype-dev \
+        pkgconfig && \
+    rm -rf /var/cache/apk/*
 
-# Copy package files
+# Copy package files for dependency resolution
 COPY package*.json ./
 
-# Install production dependencies only
-RUN npm ci --only=production --silent
+# Install production dependencies with security optimizations
+RUN npm ci --only=production --silent --no-audit --no-fund && \
+    npm cache clean --force
 
-# Stage 2: Build application
+# Stage 2: Build and optimization
 FROM node:20-alpine AS builder
 
 WORKDIR /app
 
-# Copy source code
-COPY . .
+# Copy source and dependencies
 COPY --from=dependencies /app/node_modules ./node_modules
+COPY . .
 
-# Build optimizations
-RUN npm run clean || true
-RUN npm run build || true
+# Build application with optimizations
+RUN npm run clean 2>/dev/null || true && \
+    npm run build 2>/dev/null || true && \
+    npm prune --production
 
-# Remove development files
-RUN rm -rf tests/ docs/ backups/ *.md
+# Security: Remove sensitive development files
+RUN rm -rf \
+    test/ tests/ \
+    docs/ \
+    backups/ \
+    .git/ \
+    .github/ \
+    *.md \
+    .env* \
+    .dockerignore \
+    Dockerfile* \
+    docker-compose* \
+    scripts/generate-keys.js \
+    scripts/sign-license.js \
+    keys/private.pem \
+    validation-reports/ \
+    benchmark-report.json
 
-# Stage 3: Production runtime
-FROM node:20-alpine AS production
+# Stage 3: Distroless production runtime
+FROM gcr.io/distroless/nodejs20-debian12:nonroot AS production
 
-# Create non-root user for security
-RUN addgroup -g 1001 -S lecheyne && \
-    adduser -S lecheyne -u 1001 -G lecheyne
-
+# Use distroless image for maximum security (already runs as nonroot)
 WORKDIR /app
 
-# Install runtime dependencies
-RUN apk add --no-cache \
-    curl \
-    dumb-init \
-    cairo \
-    jpeg \
-    pango \
-    musl \
-    giflib \
-    pixman \
-    pangomm \
-    libjpeg-turbo \
-    freetype
+# Copy only essential application files from builder
+COPY --from=builder --chown=nonroot:nonroot /app/package*.json ./
+COPY --from=builder --chown=nonroot:nonroot /app/node_modules ./node_modules
+COPY --from=builder --chown=nonroot:nonroot /app/src ./src
+COPY --from=builder --chown=nonroot:nonroot /app/web ./web
+COPY --from=builder --chown=nonroot:nonroot /app/openapi ./openapi
+COPY --from=builder --chown=nonroot:nonroot /app/deploy ./deploy
 
-# Copy application files
-COPY --from=builder --chown=lecheyne:lecheyne /app .
+# Create required runtime directories
+USER root
+RUN mkdir -p logs data cache keys temp && \
+    chown -R nonroot:nonroot /app
+USER nonroot
 
-# Create necessary directories
-RUN mkdir -p logs data cache keys backups && \
-    chown -R lecheyne:lecheyne /app
+# Network configuration
+EXPOSE 3000/tcp
 
-# Switch to non-root user
-USER lecheyne
+# Advanced health check with multiple endpoints
+HEALTHCHECK --interval=15s --timeout=5s --start-period=30s --retries=3 \
+    CMD ["node", "-e", "require('http').get('http://localhost:3000/healthz/strict', (res) => process.exit(res.statusCode === 200 ? 0 : 1)).on('error', () => process.exit(1))"]
 
-# Expose port
-EXPOSE 3000
+# Production environment configuration
+ENV NODE_ENV=production \
+    PORT=3000 \
+    LECHEYNE_ENVIRONMENT=production \
+    NODE_OPTIONS="--enable-source-maps --max-old-space-size=2048" \
+    UV_THREADPOOL_SIZE=16 \
+    NODE_EXTRA_CA_CERTS="" \
+    LOG_LEVEL=info \
+    ENABLE_FILE_LOGGING=true
 
-# Health check
-HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
-    CMD curl -f http://localhost:3000/healthz/strict || exit 1
-
-# Environment defaults
-ENV NODE_ENV=production
-ENV PORT=3000
-ENV LECHEYNE_ENVIRONMENT=production
-
-# Add build information
+# Build arguments for metadata
 ARG BUILD_DATE
-ARG VCS_REF
-ARG VERSION
+ARG VCS_REF 
+ARG VERSION=2.0.0
+ARG BUILD_NUMBER
 
-LABEL org.opencontainers.image.created=$BUILD_DATE
-LABEL org.opencontainers.image.url="https://lecheyne.ai"
-LABEL org.opencontainers.image.source="https://github.com/lecheyne-ai/platform"
-LABEL org.opencontainers.image.version=$VERSION
-LABEL org.opencontainers.image.revision=$VCS_REF
-LABEL org.opencontainers.image.vendor="Sticky Pty Ltd"
-LABEL org.opencontainers.image.title="Lecheyne AI"
-LABEL org.opencontainers.image.description="Enterprise Multi-Agent Development Platform"
-LABEL org.opencontainers.image.documentation="https://docs.lecheyne.ai"
+# Comprehensive OCI image labels
+LABEL org.opencontainers.image.created=${BUILD_DATE}
 LABEL org.opencontainers.image.authors="Sticky Pty Ltd <sticky.pty.ltd@gmail.com>"
-LABEL org.opencontainers.image.licenses="Enterprise"
+LABEL org.opencontainers.image.url="https://lecheyne.ai"
+LABEL org.opencontainers.image.documentation="https://docs.lecheyne.ai"
+LABEL org.opencontainers.image.source="https://github.com/stickyptyltd-glitch/ai-coding"
+LABEL org.opencontainers.image.version=${VERSION}
+LABEL org.opencontainers.image.revision=${VCS_REF}
+LABEL org.opencontainers.image.vendor="Sticky Pty Ltd"
+LABEL org.opencontainers.image.licenses="MIT"
+LABEL org.opencontainers.image.title="Lecheyne AI"
+LABEL org.opencontainers.image.description="Enterprise Multi-Agent AI Development Platform - Production Ready"
+LABEL org.lecheyne.build.number=${BUILD_NUMBER}
+LABEL org.lecheyne.security.scan="trivy"
+LABEL org.lecheyne.tier="production"
 
-# Start application with proper init system
-ENTRYPOINT ["dumb-init", "--"]
+# Security and runtime optimizations
+USER nonroot
+WORKDIR /app
+
+# Use exec form for better signal handling
 CMD ["node", "src/web-server.js"]

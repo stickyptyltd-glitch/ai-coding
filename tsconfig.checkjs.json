@@ -1,0 +1,40 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "ESNext",
+    "moduleResolution": "node",
+    "lib": ["ES2022", "DOM"],
+    "allowJs": true,
+    "checkJs": true,
+    "noEmit": true,
+    "skipLibCheck": true,
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "resolveJsonModule": true,
+    "types": ["node"],
+    "baseUrl": ".",
+    "noImplicitAny": false,
+    "noImplicitReturns": false,
+    "noUnusedLocals": false,
+    "noUnusedParameters": false,
+    "strict": false
+  },
+  "include": [
+    "src/agent.js",
+    "src/tool-chains.js",
+    "src/web-server.js",
+    "src/ai-provider.js",
+    "src/orchestration/**/*.js"
+  ],
+  "exclude": [
+    "**/*.test.js",
+    "**/*.spec.js",
+    "test/**/*",
+    "src/testing/**/*",
+    "src/api/**/*",
+    "node_modules",
+    "dist",
+    "web",
+    "docs"
+  ]
+}

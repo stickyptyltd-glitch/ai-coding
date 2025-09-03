@@ -1,20 +1,93 @@
 import { v4 as uuidv4 } from 'uuid';
 import chalk from 'chalk';
 
+/**
+ * @typedef {Object} StepOptions
+ * @property {boolean} [continueOnError=false] - Whether to continue execution if this step fails
+ * @property {number} [timeout=30000] - Timeout for step execution in milliseconds
+ * @property {number} [retries=0] - Number of retry attempts if step fails
+ * @property {string|null} [condition=null] - JavaScript expression to evaluate before executing step
+ */
+
+/**
+ * @typedef {Object} ToolChainStep
+ * @property {string} id - Unique identifier for the step
+ * @property {string} tool - The tool/method to execute
+ * @property {Object} params - Parameters to pass to the tool
+ * @property {StepOptions} options - Step execution options
+ * @property {'pending'|'running'|'completed'|'failed'|'skipped'} status - Step execution status
+ * @property {*} result - Result of step execution
+ * @property {Error|null} error - Error if step failed
+ * @property {number|null} startTime - Timestamp when step started
+ * @property {number|null} endTime - Timestamp when step completed
+ * @property {number|null} duration - Execution duration in milliseconds
+ */
+
+/**
+ * @typedef {Object} ToolChainResult
+ * @property {boolean} success - Whether the tool chain completed successfully
+ * @property {Array<ToolChainStep>} steps - Array of executed steps with results
+ * @property {Map<string, *>} variables - Variables set during execution
+ * @property {number} duration - Total execution time in milliseconds
+ * @property {string} status - Final execution status
+ * @property {Error|null} error - Error if execution failed
+ */
+
+/**
+ * Represents a sequence of automated steps that can be executed in order.
+ * 
+ * Tool chains allow for complex automation workflows with conditional logic,
+ * error handling, retries, and variable passing between steps.
+ * 
+ * @class ToolChain
+ */
 export class ToolChain {
+  /**
+   * Creates a new ToolChain instance.
+   * 
+   * @param {string} name - Name of the tool chain
+   * @param {string} [description=''] - Description of what the tool chain does
+   */
   constructor(name, description = '') {
+    /** @type {string} Unique identifier for this tool chain */
     this.id = uuidv4();
+    
+    /** @type {string} Name of the tool chain */
     this.name = name;
+    
+    /** @type {string} Description of the tool chain */
     this.description = description;
+    
+    /** @type {Array<ToolChainStep>} Array of steps to execute */
     this.steps = [];
+    
+    /** @type {Map<string, *>} Variables available to all steps */
     this.variables = new Map();
+    
+    /** @type {Array<*>} Results from completed steps */
     this.results = [];
-    this.status = 'pending'; // pending, running, completed, failed
+    
+    /** @type {'pending'|'running'|'completed'|'failed'} Current execution status */
+    this.status = 'pending';
+    
+    /** @type {Date} When the tool chain was created */
     this.createdAt = new Date();
+    
+    /** @type {Date|null} When execution started */
     this.startedAt = null;
+    
+    /** @type {Date|null} When execution completed */
     this.completedAt = null;
   }
 
+  /**
+   * Adds a step to the tool chain.
+   * 
+   * @param {string} tool - The tool/method name to execute
+   * @param {Object} params - Parameters to pass to the tool
+   * @param {StepOptions} [options={}] - Step execution options
+   * @returns {ToolChain} This tool chain instance for method chaining
+   */
   addStep(tool, params, options = {}) {
     const step = {
       id: uuidv4(),
@@ -39,11 +112,24 @@ export class ToolChain {
     return this;
   }
 
+  /**
+   * Sets a variable that can be used by steps in the tool chain.
+   * 
+   * @param {string} key - Variable name
+   * @param {*} value - Variable value
+   * @returns {ToolChain} This tool chain instance for method chaining
+   */
   setVariable(key, value) {
     this.variables.set(key, value);
     return this;
   }
 
+  /**
+   * Gets a variable value.
+   * 
+   * @param {string} key - Variable name
+   * @returns {*} The variable value, or undefined if not set
+   */
   getVariable(key) {
     return this.variables.get(key);
   }
@@ -1060,31 +1146,67 @@ export class ToolChain {
   }
 }
 
+/**
+ * Manages multiple tool chains and provides execution, templating, and history features.
+ * 
+ * @class ToolChainManager
+ */
 export class ToolChainManager {
+  /**
+   * Creates a new ToolChainManager instance.
+   */
   constructor() {
+    /** @type {Map<string, ToolChain>} Map of tool chain ID to tool chain instances */
     this.chains = new Map();
+    
+    /** @type {Map<string, Object>} Map of template names to template definitions */
     this.templates = new Map();
+    
+    /** @type {Array<Object>} History of executed tool chains */
     this.history = [];
   }
 
-  // Create a new tool chain
+  /**
+   * Creates a new tool chain.
+   * 
+   * @param {string} name - Name of the tool chain
+   * @param {string} [description=''] - Description of the tool chain
+   * @returns {ToolChain} The created tool chain instance
+   */
   createChain(name, description = '') {
     const chain = new ToolChain(name, description);
     this.chains.set(chain.id, chain);
     return chain;
   }
 
-  // Get a tool chain by ID
+  /**
+   * Gets a tool chain by its ID.
+   * 
+   * @param {string} id - The tool chain ID
+   * @returns {ToolChain|undefined} The tool chain instance, or undefined if not found
+   */
   getChain(id) {
     return this.chains.get(id);
   }
 
-  // List all chains
+  /**
+   * Lists all registered tool chains.
+   * 
+   * @returns {Array<ToolChain>} Array of all tool chain instances
+   */
   listChains() {
     return Array.from(this.chains.values());
   }
 
-  // Execute a tool chain
+  /**
+   * Executes a tool chain with the provided agent.
+   * 
+   * @param {string} chainId - ID of the tool chain to execute
+   * @param {Object} agent - The agent instance to use for execution
+   * @param {Object} [opts={}] - Execution options
+   * @returns {Promise<ToolChainResult>} The execution result
+   * @throws {Error} If tool chain is not found
+   */
   async executeChain(chainId, agent, opts = {}) {
     const chain = this.getChain(chainId);
     if (!chain) {

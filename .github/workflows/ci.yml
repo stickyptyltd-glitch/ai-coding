@@ -1,61 +1,246 @@
-name: CI
+name: 🚀 Continuous Integration
 
 on:
   push:
-    branches: ["**"]
+    branches: [ main, develop ]
   pull_request:
-    branches: ["**"]
+    branches: [ main, develop ]
+  schedule:
+    # Run security scan daily at 2 AM UTC
+    - cron: '0 2 * * *'
+
+env:
+  NODE_VERSION: '20'
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
-  build-test:
+  # Security and dependency scanning
+  security-scan:
+    name: 🔒 Security Scan
+    runs-on: ubuntu-latest
+    permissions:
+      security-events: write
+      actions: read
+      contents: read
+    
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: 🔍 Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: 'fs'
+          scan-ref: '.'
+          format: 'sarif'
+          output: 'trivy-results.sarif'
+
+      - name: 📊 Upload Trivy scan results
+        uses: github/codeql-action/upload-sarif@v3
+        if: always()
+        with:
+          sarif_file: 'trivy-results.sarif'
+
+  # Code quality and linting
+  code-quality:
+    name: 📋 Code Quality
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+
+      - name: 🟢 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: 📦 Install dependencies
+        run: npm ci
+
+      - name: 🧹 Run ESLint
+        run: npm run lint
+
+      - name: 🔍 Run TypeScript check
+        run: npm run type-check
+
+      - name: 📊 Run comprehensive validation
+        run: npm run validate
+
+  # Unit and integration testing
+  test:
+    name: 🧪 Test Suite
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        node-version: [18.x, 20.x]
+        node-version: [18, 20, 21]
+    
     steps:
-      - name: Checkout
+      - name: 📥 Checkout code
         uses: actions/checkout@v4
 
-      - name: Setup Node.js ${{ matrix.node-version }}
+      - name: 🟢 Setup Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node-version }}
           cache: 'npm'
 
-      - name: Install dependencies
+      - name: 📦 Install dependencies
         run: npm ci
         env:
-          # Speed up CI by skipping large optional downloads we don't test
           PUPPETEER_SKIP_DOWNLOAD: 'true'
 
-      - name: Lint
-        run: npm run lint
-
-      - name: Test
+      - name: 🧪 Run unit tests
         run: npm test
+        env:
+          NODE_ENV: test
+          LOG_LEVEL: error
 
-  docker-and-e2e:
+  # Performance benchmarking
+  performance:
+    name: ⚡ Performance Tests
     runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    
     steps:
-      - name: Checkout
+      - name: 📥 Checkout code
         uses: actions/checkout@v4
-      - name: Setup Node.js
+
+      - name: 🟢 Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 20.x
+          node-version: ${{ env.NODE_VERSION }}
           cache: 'npm'
-      - name: Install dependencies
+
+      - name: 📦 Install dependencies
         run: npm ci
-      - name: Build Docker image
+
+      - name: 🏃‍♂️ Run performance benchmarks
+        run: npm run benchmark
+        continue-on-error: true
+
+  # Docker build and E2E testing
+  docker-and-e2e:
+    name: 🐳 Docker & E2E Tests
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+
+      - name: 🟢 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: 📦 Install dependencies
+        run: npm ci
+
+      - name: 🐳 Build Docker image
         run: docker build -t ai-coding-agent:${{ github.sha }} .
-      - name: Run container
+
+      - name: 🔍 Run Trivy container scan
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: 'ai-coding-agent:${{ github.sha }}'
+          format: 'sarif'
+          output: 'trivy-container-results.sarif'
+
+      - name: 📊 Upload container scan results
+        uses: github/codeql-action/upload-sarif@v3
+        if: always()
+        with:
+          sarif_file: 'trivy-container-results.sarif'
+
+      - name: 🚀 Start container
         run: |
           docker run -d -p 3000:3000 --name ai-coding-agent ai-coding-agent:${{ github.sha }}
           for i in {1..30}; do curl -fsS http://localhost:3000/healthz && break || sleep 1; done
-      - name: Install Playwright Browsers
+
+      - name: 🎭 Install Playwright browsers
         run: npx playwright install --with-deps
-      - name: Run E2E tests
+
+      - name: 🧪 Run E2E tests
         run: npx playwright test
-      - name: Teardown
+        env:
+          BASE_URL: http://localhost:3000
+
+      - name: 📊 Upload E2E test results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: e2e-test-results
+          path: |
+            test-results/
+            playwright-report/
+          retention-days: 7
+
+      - name: 🧹 Cleanup container
         if: always()
         run: docker rm -f ai-coding-agent || true
+
+  # Build application
+  build:
+    name: 🔨 Build Application
+    runs-on: ubuntu-latest
+    needs: [security-scan, code-quality, test]
+    
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+
+      - name: 🟢 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: 📦 Install dependencies
+        run: npm ci
+
+      - name: 🔨 Build application
+        run: npm run build
+
+      - name: 📤 Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-artifacts
+          path: |
+            dist/
+            package*.json
+          retention-days: 7
+
+  # Final notification
+  notify:
+    name: 📢 Pipeline Status
+    runs-on: ubuntu-latest
+    needs: [security-scan, code-quality, test, build, docker-and-e2e]
+    if: always()
+    
+    steps:
+      - name: 📊 Generate summary
+        run: |
+          echo "## 🚀 CI/CD Pipeline Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Job | Status |" >> $GITHUB_STEP_SUMMARY
+          echo "|-----|--------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Security Scan | ${{ needs.security-scan.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Code Quality | ${{ needs.code-quality.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Tests | ${{ needs.test.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Build | ${{ needs.build.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Docker & E2E | ${{ needs.docker-and-e2e.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Commit:** ${{ github.sha }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Branch:** ${{ github.ref_name }}" >> $GITHUB_STEP_SUMMARY

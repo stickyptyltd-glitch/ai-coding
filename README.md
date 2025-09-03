@@ -187,6 +187,27 @@ await agent.analyze({
 });
 ```
 
+#### HTTP API Endpoints
+```bash
+# Analyze a file (optional x-api-key if AGENT_API_KEY is set)
+curl -X POST http://localhost:3000/api/agent/analyze \
+  -H 'Content-Type: application/json' \
+  -d '{"target":"src/web-server.js"}'
+
+# Modify a file with instructions
+curl -X POST http://localhost:3000/api/agent/modify \
+  -H 'Content-Type: application/json' \
+  -d '{"target":"src/agent.js","instructions":"add error logging"}'
+
+# Execute a tool chain (by id)
+curl -X POST http://localhost:3000/api/chains/<CHAIN_ID>/execute \
+  -H 'Content-Type: application/json' \
+  -d '{"variables": {"foo":"bar"}, "asJob": true}'
+
+# Check job status
+curl http://localhost:3000/api/jobs/<JOB_ID>
+```
+
 ### **Docker Deployment**
 ```bash
 # Enterprise containerized deployment

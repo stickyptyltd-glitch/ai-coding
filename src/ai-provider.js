@@ -2,11 +2,13 @@ import OpenAI from 'openai';
 import Anthropic from '@anthropic-ai/sdk';
 import axios from 'axios';
 import dotenv from 'dotenv';
+import { EventEmitter } from 'events';
 
 dotenv.config();
 
-export class AIProvider {
+export class AIProvider extends EventEmitter {
   constructor(config = {}) {
+    super();
     this.config = {
       provider: config.aiProvider || 'openai',
       model: config.model || this.getDefaultModel(config.aiProvider || 'openai'),
@@ -67,7 +69,10 @@ export class AIProvider {
         this.baseUrl = process.env.OLLAMA_BASE_URL || 'http://localhost:11434';
         this.client = axios.create({
           baseURL: this.baseUrl,
-          timeout: 60000
+          timeout: this.config.timeout,
+          headers: {
+            'Content-Type': 'application/json'
+          }
         });
         break;
       case 'lmstudio':
@@ -75,33 +80,68 @@ export class AIProvider {
         this.baseUrl = process.env.LMSTUDIO_BASE_URL || 'http://localhost:1234';
         this.client = axios.create({
           baseURL: this.baseUrl,
-          timeout: 60000
+          timeout: this.config.timeout,
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+          }
         });
         break;
       default:
         throw new Error(`Unsupported AI provider: ${this.config.provider}`);
     }
+    
+    this.initialized = true;
+    this.emit('initialized', { provider: this.config.provider, model: this.config.model });
   }
 
+  /**
+   * Queries the AI provider with circuit breaker protection and comprehensive error handling.
+   * 
+   * @param {string} prompt - The prompt to send to the AI
+   * @param {Object} [options={}] - Additional options
+   * @returns {Promise<string>} AI response
+   * @throws {Error} If circuit is open or query fails after retries
+   */
   async query(prompt, options = {}) {
+    // Check circuit breaker state
+    if (!this.isCircuitClosed()) {
+      throw new Error(`Circuit breaker is ${this.circuitBreaker.state}. Provider temporarily unavailable.`);
+    }
+    
+    const startTime = Date.now();
+    this.metrics.totalRequests++;
+    
     try {
       const mergedOptions = { ...this.config, ...options };
       
-      switch (this.config.provider) {
-        case 'openai':
-          return await this.queryOpenAI(prompt, mergedOptions);
-        case 'anthropic':
-          return await this.queryAnthropic(prompt, mergedOptions);
-        case 'ollama':
-          return await this.queryOllama(prompt, mergedOptions);
-        case 'lmstudio':
-          return await this.queryLMStudio(prompt, mergedOptions);
-        default:
-          throw new Error(`Unsupported provider: ${this.config.provider}`);
-      }
+      const result = await this.retryWithBackoff(async () => {
+        switch (this.config.provider) {
+          case 'openai':
+            return await this.queryOpenAI(prompt, mergedOptions);
+          case 'anthropic':
+            return await this.queryAnthropic(prompt, mergedOptions);
+          case 'ollama':
+            return await this.queryOllama(prompt, mergedOptions);
+          case 'lmstudio':
+            return await this.queryLMStudio(prompt, mergedOptions);
+          default:
+            throw new Error(`Unsupported provider: ${this.config.provider}`);
+        }
+      }, this.config.maxRetries, { provider: this.config.provider, prompt: prompt.substring(0, 100) });
+      
+      // Record success metrics
+      const duration = Date.now() - startTime;
+      this.recordSuccess(duration);
+      
+      return result;
     } catch (error) {
-      console.error(`AI Provider Error (${this.config.provider}):`, error.message);
-      throw new Error(`AI query failed: ${error.message}`);
+      this.recordFailure(error);
+      const enhancedError = new Error(`AI Provider (${this.config.provider}) failed: ${error.message}`);
+      enhancedError.originalError = error;
+      enhancedError.provider = this.config.provider;
+      enhancedError.circuitState = this.circuitBreaker.state;
+      throw enhancedError;
     }
   }
 
@@ -973,5 +1013,241 @@ Provide 3-5 most relevant suggestions.`;
     }
 
     return validated;
+  }
+
+  // Circuit Breaker Methods
+  
+  /**
+   * Checks if the circuit breaker is in a closed state (allowing requests).
+   * 
+   * @returns {boolean} True if circuit is closed
+   */
+  isCircuitClosed() {
+    const now = Date.now();
+    
+    switch (this.circuitBreaker.state) {
+      case 'CLOSED':
+        return true;
+      case 'OPEN':
+        if (now >= this.circuitBreaker.nextAttempt) {
+          this.circuitBreaker.state = 'HALF_OPEN';
+          this.emit('circuit-breaker', { state: 'HALF_OPEN', reason: 'timeout_expired' });
+          return true;
+        }
+        return false;
+      case 'HALF_OPEN':
+        return true;
+      default:
+        return false;
+    }
+  }
+  
+  /**
+   * Records a successful request and potentially resets circuit breaker.
+   * 
+   * @param {number} duration - Request duration in milliseconds
+   */
+  recordSuccess(duration) {
+    this.metrics.successfulRequests++;
+    
+    // Update response time metrics
+    this.metrics.recentResponseTimes.push(duration);
+    if (this.metrics.recentResponseTimes.length > 100) {
+      this.metrics.recentResponseTimes = this.metrics.recentResponseTimes.slice(-100);
+    }
+    
+    const sum = this.metrics.recentResponseTimes.reduce((a, b) => a + b, 0);
+    this.metrics.averageResponseTime = sum / this.metrics.recentResponseTimes.length;
+    
+    // Reset circuit breaker on success
+    if (this.circuitBreaker.state !== 'CLOSED') {
+      this.resetCircuitBreaker();
+    }
+    
+    this.emit('request-success', { duration, metrics: this.getMetrics() });
+  }
+  
+  /**
+   * Records a failed request and potentially opens circuit breaker.
+   * 
+   * @param {Error} error - The error that occurred
+   */
+  recordFailure(error) {
+    this.metrics.failedRequests++;
+    this.circuitBreaker.failures++;
+    this.circuitBreaker.lastFailTime = Date.now();
+    
+    if (this.circuitBreaker.failures >= this.config.circuitBreakerFailureThreshold) {
+      this.openCircuitBreaker();
+    }
+    
+    this.emit('request-failure', { 
+      error: error.message, 
+      failures: this.circuitBreaker.failures,
+      circuitState: this.circuitBreaker.state,
+      metrics: this.getMetrics()
+    });
+  }
+  
+  /**
+   * Opens the circuit breaker to prevent further requests.
+   */
+  openCircuitBreaker() {
+    this.circuitBreaker.state = 'OPEN';
+    this.circuitBreaker.nextAttempt = Date.now() + this.config.circuitBreakerResetTimeout;
+    
+    this.emit('circuit-breaker', { 
+      state: 'OPEN', 
+      reason: 'failure_threshold_exceeded',
+      failures: this.circuitBreaker.failures,
+      nextAttempt: this.circuitBreaker.nextAttempt
+    });
+  }
+  
+  /**
+   * Resets the circuit breaker to closed state.
+   */
+  resetCircuitBreaker() {
+    const previousState = this.circuitBreaker.state;
+    this.circuitBreaker.state = 'CLOSED';
+    this.circuitBreaker.failures = 0;
+    this.circuitBreaker.lastFailTime = 0;
+    this.circuitBreaker.nextAttempt = 0;
+    
+    this.emit('circuit-breaker', { 
+      state: 'CLOSED', 
+      reason: 'reset_after_success',
+      previousState
+    });
+  }
+  
+  // Error Classification Methods
+  
+  /**
+   * Determines if an error is retryable.
+   * 
+   * @param {Error} error - The error to check
+   * @returns {boolean} True if error is retryable
+   */
+  isRetryableError(error) {
+    // Network errors are generally retryable
+    if (error.code === 'ECONNRESET' || error.code === 'ENOTFOUND' || error.code === 'ETIMEDOUT') {
+      return true;
+    }
+    
+    // HTTP status codes that are retryable
+    if (error.response) {
+      const status = error.response.status;
+      return status === 408 || // Request Timeout
+             status === 429 || // Too Many Requests
+             status === 502 || // Bad Gateway
+             status === 503 || // Service Unavailable
+             status === 504;   // Gateway Timeout
+    }
+    
+    // OpenAI/Anthropic specific retryable errors
+    if (error.message) {
+      const message = error.message.toLowerCase();
+      return message.includes('timeout') ||
+             message.includes('rate limit') ||
+             message.includes('server error') ||
+             message.includes('temporarily unavailable');
+    }
+    
+    return false;
+  }
+  
+  /**
+   * Determines if an error is due to rate limiting.
+   * 
+   * @param {Error} error - The error to check
+   * @returns {boolean} True if error is rate limit related
+   */
+  isRateLimitError(error) {
+    if (error.response && error.response.status === 429) {
+      return true;
+    }
+    
+    if (error.message) {
+      const message = error.message.toLowerCase();
+      return message.includes('rate limit') || message.includes('quota exceeded');
+    }
+    
+    return false;
+  }
+  
+  /**
+   * Updates rate limit information from error response.
+   * 
+   * @param {Error} error - Rate limit error
+   */
+  updateRateLimit(error) {
+    if (error.response && error.response.headers) {
+      const resetTime = error.response.headers['x-ratelimit-reset'] ||
+                       error.response.headers['retry-after'];
+      
+      if (resetTime) {
+        this.rateLimits.set(this.config.provider, Date.now() + (parseInt(resetTime) * 1000));
+      }
+    }
+  }
+  
+  // Utility Methods
+  
+  /**
+   * Sleeps for the specified duration.
+   * 
+   * @param {number} ms - Duration in milliseconds
+   * @returns {Promise<void>}
+   */
+  async sleep(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+  }
+  
+  /**
+   * Gets current provider metrics.
+   * 
+   * @returns {Object} Current metrics and circuit breaker state
+   */
+  getMetrics() {
+    const totalRequests = this.metrics.totalRequests || 1; // Avoid division by zero
+    
+    return {
+      ...this.metrics,
+      successRate: this.metrics.successfulRequests / totalRequests,
+      failureRate: this.metrics.failedRequests / totalRequests,
+      circuitBreaker: { ...this.circuitBreaker },
+      uptime: Date.now() - (this.initialized ? this.initialized : Date.now()),
+      provider: this.config.provider,
+      model: this.config.model
+    };
+  }
+  
+  /**
+   * Gets health status of the provider.
+   * 
+   * @returns {Object} Health status information
+   */
+  getHealthStatus() {
+    const metrics = this.getMetrics();
+    
+    return {
+      healthy: this.circuitBreaker.state === 'CLOSED' && metrics.successRate > 0.8,
+      circuitState: this.circuitBreaker.state,
+      successRate: metrics.successRate,
+      averageResponseTime: metrics.averageResponseTime,
+      lastFailure: this.circuitBreaker.lastFailTime,
+      provider: this.config.provider,
+      model: this.config.model,
+      timestamp: Date.now()
+    };
+  }
+  
+  /**
+   * Manually resets the circuit breaker (for administrative purposes).
+   */
+  forceResetCircuitBreaker() {
+    this.resetCircuitBreaker();
+    this.emit('circuit-breaker', { state: 'CLOSED', reason: 'manual_reset' });
   }
 }

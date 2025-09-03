@@ -16,8 +16,54 @@ import { NegotiatorAgent } from './negotiator-agent.js';
 import EnterpriseCodeAgent from './enterprise-agent.js';
 import chalk from 'chalk';
 
+/**
+ * @typedef {Object} AgentConfig
+ * @property {'openai'|'anthropic'|'ollama'|'lmstudio'} [aiProvider='openai'] - AI provider to use
+ * @property {string} [model='gpt-4'] - Model name to use
+ * @property {number} [maxTokens=4000] - Maximum tokens for AI responses
+ * @property {number} [temperature=0.1] - Temperature for AI responses
+ * @property {boolean} [enableAdvancedFeatures=true] - Enable advanced agent features
+ * @property {boolean} [enableErrorRecovery=true] - Enable automatic error recovery
+ * @property {boolean} [enableContextualLearning=true] - Enable contextual learning
+ * @property {number} [maxRetries=3] - Maximum retry attempts for operations
+ */
+
+/**
+ * @typedef {Object} TaskResult
+ * @property {boolean} success - Whether the task completed successfully
+ * @property {*} [result] - The result of the task
+ * @property {string} [error] - Error message if task failed
+ * @property {number} [duration] - Time taken to complete task in milliseconds
+ * @property {Object} [metadata] - Additional metadata about the task
+ */
+
+/**
+ * @typedef {Object} InitializationResult
+ * @property {boolean} success - Whether initialization was successful
+ * @property {boolean} [alreadyInitialized] - Whether agent was already initialized
+ * @property {Array<{component: string, status: 'success'|'error', error?: string}>} [results] - Initialization results per component
+ * @property {string} [error] - Error message if initialization failed
+ */
+
+/**
+ * Advanced AI Coding Agent with multi-agent coordination, error healing, and enterprise features.
+ * 
+ * This class provides a comprehensive coding assistant that can analyze code, generate solutions,
+ * coordinate with multiple specialized agents, and learn from interactions.
+ * 
+ * @class CodingAgent
+ */
 export class CodingAgent {
+  /**
+   * Creates a new CodingAgent instance.
+   * 
+   * @param {AgentConfig} [config={}] - Configuration options for the agent
+   */
   constructor(config = {}) {
+    /**
+     * Agent configuration
+     * @type {AgentConfig}
+     */
     this.config = {
       aiProvider: 'openai',
       model: 'gpt-4',
@@ -30,41 +76,105 @@ export class CodingAgent {
       ...config
     };
 
+    /** @type {FileSystem} File system operations handler */
     this.filesystem = new FileSystem();
+    
+    /** @type {AIProvider} AI provider interface */
     this.aiProvider = new AIProvider(this.config);
+    
+    /** @type {CommandParser} Command parsing and execution */
     this.commandParser = new CommandParser();
+    
+    /** @type {CodeAnalyzer} Code analysis and insights */
     this.codeAnalyzer = new CodeAnalyzer();
+    
+    /** @type {WebScraper} Web scraping capabilities */
     this.webScraper = new WebScraper();
+    
+    /** @type {ToolChainManager} Tool chain workflow management */
     this.toolChainManager = new ToolChainManager(this);
+    
+    /** @type {MemoryManager} Persistent memory and context management */
     this.memoryManager = new MemoryManager();
+    
+    /** @type {ErrorHealingSystem} Automatic error recovery system */
     this.errorHealer = new ErrorHealingSystem(this);
+    
+    /** @type {ContextAwareSearch} Context-aware search capabilities */
     this.contextSearch = new ContextAwareSearch(this);
+    
+    /** @type {RefactoringOptimizer} Code refactoring and optimization */
     this.refactoringOptimizer = new RefactoringOptimizer(this);
+    
+    /** @type {MultiAgentSystem} Multi-agent coordination system */
     this.multiAgent = new MultiAgentSystem(this);
+    
+    /** @type {GoalOrientedPlanner} Goal-oriented task planning */
     this.goalPlanner = new GoalOrientedPlanner(this);
+    
+    /** @type {PredictiveHelper} Predictive assistance and suggestions */
     this.predictiveHelper = new PredictiveHelper(this);
+    
+    /** @type {SimulationSandbox} Code simulation and testing environment */
     this.simulationSandbox = new SimulationSandbox(this);
+    
+    /** @type {NegotiatorAgent} Requirement negotiation and clarification */
     this.negotiator = new NegotiatorAgent(this);
+    
+    /** @type {EnterpriseCodeAgent} Enterprise-level features and compliance */
     this.enterpriseAgent = new EnterpriseCodeAgent(this.aiProvider, this.config);
+    
+    /** @type {Map<string, *>} Runtime context and state */
     this.context = new Map();
+    
+    /** @type {boolean} Whether the agent has been initialized */
     this.initialized = false;
 
     // Enhanced capabilities
+    /** @type {Array<Object>} History of agent sessions and interactions */
     this.sessionHistory = [];
+    
+    /** @type {Map<string, Object>} Performance metrics and analytics */
     this.performanceMetrics = new Map();
+    
+    /** @type {Array<Object>} Learning data for continuous improvement */
     this.learningData = [];
+    
+    /** @type {Map<string, Object>} Active project contexts */
     this.activeProjects = new Map();
+    
+    /** @type {Map<string, Object>} Knowledge base about codebases */
     this.codebaseKnowledge = new Map();
+    
+    /** @type {Map<string, Object>} Patterns of common errors */
     this.errorPatterns = new Map();
+    
+    /** @type {Map<string, Object>} Patterns of successful solutions */
     this.successPatterns = new Map();
 
     // Initialize performance tracking
+    /** @type {number} Timestamp when agent was created */
     this.startTime = Date.now();
+    
+    /** @type {number} Total number of operations performed */
     this.operationCount = 0;
+    
+    /** @type {number} Number of errors encountered */
     this.errorCount = 0;
+    
+    /** @type {number} Number of successful operations */
     this.successCount = 0;
   }
 
+  /**
+   * Initializes the coding agent and all its subsystems.
+   * 
+   * This method sets up all the agent's components including AI provider,
+   * memory management, tool chains, and specialized agents.
+   * 
+   * @returns {Promise<InitializationResult>} The initialization result
+   * @throws {Error} If critical components fail to initialize
+   */
   async initialize() {
     try {
       if (this.initialized) return { success: true, alreadyInitialized: true };
@@ -166,6 +276,11 @@ export class CodingAgent {
     }
   }
 
+  /**
+   * Validates the agent configuration for correctness and completeness.
+   * 
+   * @returns {{valid: boolean, errors: string[], warnings: string[]}} Validation result
+   */
   validateConfiguration() {
     const errors = [];
     const warnings = [];
@@ -203,6 +318,16 @@ export class CodingAgent {
     };
   }
 
+  /**
+   * Processes a command input and executes the appropriate action.
+   * 
+   * This is the main entry point for command execution. It handles command parsing,
+   * validation, execution with retry logic, and error recovery.
+   * 
+   * @param {string} input - The command input to process
+   * @returns {Promise<TaskResult>} The result of command execution
+   * @throws {Error} If the command fails and cannot be recovered
+   */
   async processCommand(input) {
     const startTime = Date.now();
     this.operationCount++;
@@ -460,6 +585,14 @@ export class CodingAgent {
   }
 
   // Enhanced utility methods for improved functionality
+  /**
+   * Executes an operation with retry logic and error recovery.
+   * 
+   * @param {Function} operation - The operation to execute
+   * @param {number|null} [maxRetries=null] - Maximum retry attempts (uses config if null)
+   * @returns {Promise<*>} The result of the operation
+   * @throws {Error} If all retry attempts fail
+   */
   async executeWithRetry(operation, maxRetries = null) {
     const retries = maxRetries || this.config.maxRetries || 3;
     let lastError;
@@ -613,6 +746,16 @@ export class CodingAgent {
     };
   }
 
+  /**
+   * Analyzes code in the specified file path.
+   * 
+   * Provides comprehensive code analysis including structure, patterns,
+   * potential issues, and improvement suggestions.
+   * 
+   * @param {string} filePath - Path to the file to analyze
+   * @returns {Promise<TaskResult>} Analysis results with insights and recommendations
+   * @throws {Error} If file cannot be read or analysis fails
+   */
   async analyzeCode(filePath) {
     const content = await this.filesystem.readFile(filePath);
     const analysis = await this.codeAnalyzer.analyze(content, filePath);
@@ -740,6 +883,16 @@ Please provide:
   }
 
   // Enhanced performance monitoring methods
+  /**
+   * Generates a comprehensive performance report for the agent.
+   * 
+   * @returns {Object} Performance metrics and statistics
+   * @property {number} uptime - Agent uptime in milliseconds
+   * @property {number} operationCount - Total operations performed
+   * @property {number} successRate - Success rate as a decimal (0-1)
+   * @property {number} errorRate - Error rate as a decimal (0-1)
+   * @property {Object} averageResponseTime - Average response times by operation type
+   */
   getPerformanceReport() {
     const uptime = Date.now() - this.startTime;
     const totalOperations = this.operationCount;
@@ -852,6 +1005,14 @@ Please provide:
       .map(([command, count]) => ({ command, count }));
   }
 
+  /**
+   * Modifies code in a file according to given instructions.
+   * 
+   * @param {string} filePath - Path to the file to modify
+   * @param {string} instructions - Instructions for how to modify the code
+   * @returns {Promise<TaskResult>} Result of the modification operation
+   * @throws {Error} If file cannot be accessed or modification fails
+   */
   async modifyCode(filePath, instructions) {
     const content = await this.filesystem.readFile(filePath);
     
@@ -877,6 +1038,14 @@ Please provide the modified code. Respond with only the code, no explanations.`;
     };
   }
 
+  /**
+   * Creates a new file with content based on instructions.
+   * 
+   * @param {string} filePath - Path where the new file should be created
+   * @param {string} instructions - Instructions for the file content
+   * @returns {Promise<TaskResult>} Result of the file creation operation
+   * @throws {Error} If file cannot be created or directory doesn't exist
+   */
   async createFile(filePath, instructions) {
     const prompt = `You are a coding agent. Create a new file with the following requirements:
 
@@ -952,6 +1121,12 @@ CRITICAL: Respond with ONLY the raw file content. No markdown code blocks, no ex
     return cleaned.trim();
   }
 
+  /**
+   * Searches for code patterns across the project.
+   * 
+   * @param {string} query - Search query or pattern to find
+   * @returns {Promise<TaskResult>} Search results with matched files and contexts
+   */
   async searchCode(query) {
     const results = await this.filesystem.searchFiles(query);
     
@@ -981,6 +1156,13 @@ Please summarize what was found and any patterns or insights.`;
     };
   }
 
+  /**
+   * Provides detailed explanation of code in the specified file.
+   * 
+   * @param {string} filePath - Path to the file to explain
+   * @returns {Promise<TaskResult>} Detailed explanation of the code
+   * @throws {Error} If file cannot be read
+   */
   async explainCode(filePath) {
     const content = await this.filesystem.readFile(filePath);
     
@@ -1006,6 +1188,12 @@ Please provide:
     };
   }
 
+  /**
+   * Handles general programming queries and questions.
+   * 
+   * @param {string} query - The general query or question
+   * @returns {Promise<TaskResult>} Response to the query
+   */
   async handleGeneralQuery(query) {
     const contextInfo = this.getContextInfo();
     
@@ -1034,6 +1222,14 @@ Please provide a helpful response.`;
     return context || 'No context available';
   }
 
+  /**
+   * Scrapes content from a web URL.
+   * 
+   * @param {string} url - URL to scrape
+   * @param {string|null} [outputFile=null] - Optional file to save scraped content
+   * @returns {Promise<TaskResult>} Scraped content and metadata
+   * @throws {Error} If URL cannot be accessed or scraped
+   */
   async scrapeUrl(url, outputFile = null) {
     try {
       console.log(chalk.blue(`🌐 Scraping: ${url}`));
