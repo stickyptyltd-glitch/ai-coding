@@ -1,0 +1,41 @@
+services:
+  - type: web
+    name: lecheyne-ai
+    runtime: node
+    plan: starter
+    region: oregon
+    buildCommand: npm ci && npm run build
+    startCommand: npm start
+    healthCheckPath: /healthz
+    autoDeploy: false
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 3000
+      - key: LECHEYNE_ENVIRONMENT
+        value: production
+      - key: ENABLE_ENTERPRISE_FEATURES
+        value: true
+      - key: ENABLE_METRICS
+        value: true
+      - key: LOG_LEVEL
+        value: info
+      - key: ENABLE_FILE_LOGGING
+        value: true
+      - key: METRICS_REFRESH_MS
+        value: 15000
+      - key: NODE_OPTIONS
+        value: "--enable-source-maps --max-old-space-size=2048"
+      - key: UV_THREADPOOL_SIZE
+        value: 16
+      - key: OPENAI_API_KEY
+        sync: false
+      - key: ANTHROPIC_API_KEY
+        sync: false
+      - key: AGENT_API_KEY
+        sync: false
+    disk:
+      name: lecheyne-ai-data
+      mountPath: /app/data
+      sizeGB: 1

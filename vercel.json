@@ -1,0 +1,48 @@
+{
+  "version": 2,
+  "name": "lecheyne-ai",
+  "builds": [
+    {
+      "src": "src/web-server.js",
+      "use": "@vercel/node",
+      "config": {
+        "includeFiles": [
+          "src/**",
+          "web/**",
+          "package.json"
+        ]
+      }
+    }
+  ],
+  "routes": [
+    {
+      "src": "/healthz",
+      "dest": "/src/web-server.js"
+    },
+    {
+      "src": "/api/(.*)",
+      "dest": "/src/web-server.js"
+    },
+    {
+      "src": "/socket.io/(.*)",
+      "dest": "/src/web-server.js"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/src/web-server.js"
+    }
+  ],
+  "env": {
+    "NODE_ENV": "production",
+    "LECHEYNE_ENVIRONMENT": "production",
+    "ENABLE_ENTERPRISE_FEATURES": "true",
+    "ENABLE_METRICS": "true",
+    "LOG_LEVEL": "info",
+    "METRICS_REFRESH_MS": "15000"
+  },
+  "functions": {
+    "src/web-server.js": {
+      "maxDuration": 30
+    }
+  }
+}
