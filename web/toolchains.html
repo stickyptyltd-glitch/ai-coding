@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lecheyne AI - Tool Chains</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/toolchains.css">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔗</text></svg>">
+</head>
+<body>
+    <div id="toolchains-app">
+        <!-- Header -->
+        <header class="toolchains-header">
+            <div class="header-content">
+                <div class="logo">
+                    <span class="logo-icon">🔗</span>
+                    <span class="logo-text">LECHEYNE AI</span>
+                    <span class="logo-tagline">Tool Chains</span>
+                </div>
+                <div class="header-controls">
+                    <button id="new-chain-btn" class="btn-primary">+ New Chain</button>
+                    <button id="import-chain-btn" class="btn-secondary">Import</button>
+                    <button id="refresh-btn" class="icon-btn" title="Refresh">🔄</button>
+                    <a href="/" class="icon-btn" title="Back to App">🏠</a>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <div class="toolchains-container">
+            <!-- Chain Stats -->
+            <div class="chain-stats">
+                <div class="stat-card">
+                    <div class="stat-icon">🔗</div>
+                    <div class="stat-content">
+                        <div class="stat-value" id="total-chains">8</div>
+                        <div class="stat-label">Total Chains</div>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">▶️</div>
+                    <div class="stat-content">
+                        <div class="stat-value" id="executions-today">24</div>
+                        <div class="stat-label">Executions Today</div>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">✅</div>
+                    <div class="stat-content">
+                        <div class="stat-value" id="success-rate">96%</div>
+                        <div class="stat-label">Success Rate</div>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">⚡</div>
+                    <div class="stat-content">
+                        <div class="stat-value" id="avg-duration">2.3s</div>
+                        <div class="stat-label">Avg Duration</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Chain Library -->
+            <div class="chain-library">
+                <div class="library-header">
+                    <h2>Chain Library</h2>
+                    <div class="library-controls">
+                        <div class="search-box">
+                            <input type="text" id="chain-search" placeholder="Search chains...">
+                            <button class="search-btn">🔍</button>
+                        </div>
+                        <select id="chain-filter" class="filter-select">
+                            <option value="all">All Chains</option>
+                            <option value="development">Development</option>
+                            <option value="testing">Testing</option>
+                            <option value="deployment">Deployment</option>
+                            <option value="custom">Custom</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Chains Grid -->
+                <div class="chains-grid" id="chains-grid">
+                    <!-- Development Chain -->
+                    <div class="chain-card" data-chain="code-review-deploy" data-category="development">
+                        <div class="chain-header">
+                            <div class="chain-icon">🔄</div>
+                            <div class="chain-status active"></div>
+                        </div>
+                        <div class="chain-info">
+                            <h3>Code Review & Deploy</h3>
+                            <p>Automated code review, testing, and deployment pipeline</p>
+                            <div class="chain-tags">
+                                <span class="tag">Development</span>
+                                <span class="tag">5 Steps</span>
+                            </div>
+                        </div>
+                        <div class="chain-flow">
+                            <div class="flow-step">📝 Analyze</div>
+                            <div class="flow-arrow">→</div>
+                            <div class="flow-step">🧪 Test</div>
+                            <div class="flow-arrow">→</div>
+                            <div class="flow-step">🚀 Deploy</div>
+                        </div>
+                        <div class="chain-stats">
+                            <span class="stat">Last run: 2h ago</span>
+                            <span class="stat">Success: 94%</span>
+                        </div>
+                        <div class="chain-actions">
+                            <button class="btn-primary" data-action="run">Run</button>
+                            <button class="btn-secondary" data-action="edit">Edit</button>
+                            <button class="btn-secondary" data-action="view">View</button>
+                        </div>
+                    </div>
+
+                    <!-- Testing Chain -->
+                    <div class="chain-card" data-chain="full-test-suite" data-category="testing">
+                        <div class="chain-header">
+                            <div class="chain-icon">🧪</div>
+                            <div class="chain-status active"></div>
+                        </div>
+                        <div class="chain-info">
+                            <h3>Full Test Suite</h3>
+                            <p>Comprehensive testing including unit, integration, and E2E tests</p>
+                            <div class="chain-tags">
+                                <span class="tag">Testing</span>
+                                <span class="tag">7 Steps</span>
+                            </div>
+                        </div>
+                        <div class="chain-flow">
+                            <div class="flow-step">📋 Setup</div>
+                            <div class="flow-arrow">→</div>
+                            <div class="flow-step">🔍 Unit</div>
+                            <div class="flow-arrow">→</div>
+                            <div class="flow-step">🌐 E2E</div>
+                        </div>
+                        <div class="chain-stats">
+                            <span class="stat">Last run: 1h ago</span>
+                            <span class="stat">Success: 98%</span>
+                        </div>
+                        <div class="chain-actions">
+                            <button class="btn-primary" data-action="run">Run</button>
+                            <button class="btn-secondary" data-action="edit">Edit</button>
+                            <button class="btn-secondary" data-action="view">View</button>
+                        </div>
+                    </div>
+
+                    <!-- Security Audit Chain -->
+                    <div class="chain-card" data-chain="security-audit" data-category="development">
+                        <div class="chain-header">
+                            <div class="chain-icon">🔒</div>
+                            <div class="chain-status active"></div>
+                        </div>
+                        <div class="chain-info">
+                            <h3>Security Audit</h3>
+                            <p>Complete security analysis and vulnerability assessment</p>
+                            <div class="chain-tags">
+                                <span class="tag">Security</span>
+                                <span class="tag">4 Steps</span>
+                            </div>
+                        </div>
+                        <div class="chain-flow">
+                            <div class="flow-step">🔍 Scan</div>
+                            <div class="flow-arrow">→</div>
+                            <div class="flow-step">📊 Report</div>
+                            <div class="flow-arrow">→</div>
+                            <div class="flow-step">🛡️ Fix</div>
+                        </div>
+                        <div class="chain-stats">
+                            <span class="stat">Last run: 6h ago</span>
+                            <span class="stat">Success: 92%</span>
+                        </div>
+                        <div class="chain-actions">
+                            <button class="btn-primary" data-action="run">Run</button>
+                            <button class="btn-secondary" data-action="edit">Edit</button>
+                            <button class="btn-secondary" data-action="view">View</button>
+                        </div>
+                    </div>
+
+                    <!-- Performance Optimization -->
+                    <div class="chain-card" data-chain="performance-opt" data-category="development">
+                        <div class="chain-header">
+                            <div class="chain-icon">⚡</div>
+                            <div class="chain-status active"></div>
+                        </div>
+                        <div class="chain-info">
+                            <h3>Performance Optimization</h3>
+                            <p>Analyze and optimize application performance metrics</p>
+                            <div class="chain-tags">
+                                <span class="tag">Performance</span>
+                                <span class="tag">6 Steps</span>
+                            </div>
+                        </div>
+                        <div class="chain-flow">
+                            <div class="flow-step">📈 Benchmark</div>
+                            <div class="flow-arrow">→</div>
+                            <div class="flow-step">🔧 Optimize</div>
+                            <div class="flow-arrow">→</div>
+                            <div class="flow-step">✅ Verify</div>
+                        </div>
+                        <div class="chain-stats">
+                            <span class="stat">Last run: 4h ago</span>
+                            <span class="stat">Success: 89%</span>
+                        </div>
+                        <div class="chain-actions">
+                            <button class="btn-primary" data-action="run">Run</button>
+                            <button class="btn-secondary" data-action="edit">Edit</button>
+                            <button class="btn-secondary" data-action="view">View</button>
+                        </div>
+                    </div>
+
+                    <!-- Add new chain card -->
+                    <div class="chain-card add-chain-card" id="add-chain-card">
+                        <div class="add-chain-content">
+                            <div class="add-icon">➕</div>
+                            <h3>Create New Chain</h3>
+                            <p>Build a custom automation workflow</p>
+                            <button class="btn-primary">Get Started</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Chain Builder Panel -->
+            <div class="chain-builder" id="chain-builder" style="display: none;">
+                <div class="builder-header">
+                    <h2 id="builder-title">Chain Builder</h2>
+                    <div class="builder-controls">
+                        <button id="save-chain" class="btn-primary">Save Chain</button>
+                        <button id="test-chain" class="btn-secondary">Test</button>
+                        <button id="close-builder" class="icon-btn">✕</button>
+                    </div>
+                </div>
+
+                <div class="builder-content">
+                    <div class="chain-properties">
+                        <div class="form-group">
+                            <label for="chain-name">Chain Name</label>
+                            <input type="text" id="chain-name" placeholder="Enter chain name">
+                        </div>
+                        <div class="form-group">
+                            <label for="chain-description">Description</label>
+                            <textarea id="chain-description" placeholder="Describe what this chain does"></textarea>
+                        </div>
+                    </div>
+
+                    <div class="chain-designer">
+                        <div class="tool-palette">
+                            <h4>Available Tools</h4>
+                            <div class="tool-list">
+                                <div class="tool-item" draggable="true" data-tool="analyze">
+                                    <span class="tool-icon">🔍</span>
+                                    <span class="tool-name">Analyze Code</span>
+                                </div>
+                                <div class="tool-item" draggable="true" data-tool="modify">
+                                    <span class="tool-icon">✏️</span>
+                                    <span class="tool-name">Modify Code</span>
+                                </div>
+                                <div class="tool-item" draggable="true" data-tool="test">
+                                    <span class="tool-icon">🧪</span>
+                                    <span class="tool-name">Run Tests</span>
+                                </div>
+                                <div class="tool-item" draggable="true" data-tool="deploy">
+                                    <span class="tool-icon">🚀</span>
+                                    <span class="tool-name">Deploy</span>
+                                </div>
+                                <div class="tool-item" draggable="true" data-tool="notify">
+                                    <span class="tool-icon">📧</span>
+                                    <span class="tool-name">Send Notification</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="chain-canvas">
+                            <div class="canvas-header">
+                                <h4>Chain Flow</h4>
+                                <div class="canvas-controls">
+                                    <button class="btn-sm" id="clear-canvas">Clear</button>
+                                    <button class="btn-sm" id="auto-layout">Auto Layout</button>
+                                </div>
+                            </div>
+                            <div class="canvas-area" id="chain-canvas">
+                                <div class="drop-zone">
+                                    <p>Drag tools here to build your chain</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Execution History -->
+            <div class="execution-history">
+                <div class="history-header">
+                    <h3>Recent Executions</h3>
+                    <button class="btn-secondary" id="clear-history">Clear History</button>
+                </div>
+                <div class="history-list" id="execution-history">
+                    <div class="execution-item success">
+                        <div class="execution-info">
+                            <span class="execution-chain">Code Review & Deploy</span>
+                            <span class="execution-time">2 hours ago</span>
+                        </div>
+                        <div class="execution-status">
+                            <span class="status-badge success">Success</span>
+                            <span class="execution-duration">2.3s</span>
+                        </div>
+                    </div>
+                    <div class="execution-item success">
+                        <div class="execution-info">
+                            <span class="execution-chain">Full Test Suite</span>
+                            <span class="execution-time">1 hour ago</span>
+                        </div>
+                        <div class="execution-status">
+                            <span class="status-badge success">Success</span>
+                            <span class="execution-duration">45.2s</span>
+                        </div>
+                    </div>
+                    <div class="execution-item failed">
+                        <div class="execution-info">
+                            <span class="execution-chain">Security Audit</span>
+                            <span class="execution-time">6 hours ago</span>
+                        </div>
+                        <div class="execution-status">
+                            <span class="status-badge failed">Failed</span>
+                            <span class="execution-duration">12.1s</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Execution Modal -->
+    <div id="execution-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="execution-modal-title">Chain Execution</h2>
+                <button class="close-btn" id="close-execution-modal">×</button>
+            </div>
+            <div class="modal-body" id="execution-modal-body">
+                <!-- Content will be loaded dynamically -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Container -->
+    <div id="toast-container" class="toast-container"></div>
+
+    <!-- Scripts -->
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="/js/toolchains.js"></script>
+</body>
+</html>

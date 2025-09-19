@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lecheyne AI - Agent Management</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/agents.css">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🤖</text></svg>">
+</head>
+<body>
+    <div id="agents-app">
+        <!-- Header -->
+        <header class="agents-header">
+            <div class="header-content">
+                <div class="logo">
+                    <span class="logo-icon">🤖</span>
+                    <span class="logo-text">LECHEYNE AI</span>
+                    <span class="logo-tagline">Agent Management</span>
+                </div>
+                <div class="header-controls">
+                    <button id="add-agent-btn" class="btn-primary">+ New Agent</button>
+                    <button id="refresh-btn" class="icon-btn" title="Refresh">🔄</button>
+                    <a href="/" class="icon-btn" title="Back to App">🏠</a>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <div class="agents-container">
+            <!-- Agent Stats Overview -->
+            <div class="stats-overview">
+                <div class="stat-card">
+                    <div class="stat-icon">🤖</div>
+                    <div class="stat-content">
+                        <div class="stat-value" id="total-agents">15</div>
+                        <div class="stat-label">Total Agents</div>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">✅</div>
+                    <div class="stat-content">
+                        <div class="stat-value" id="active-agents">12</div>
+                        <div class="stat-label">Active Agents</div>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">📊</div>
+                    <div class="stat-content">
+                        <div class="stat-value" id="total-tasks">247</div>
+                        <div class="stat-label">Tasks Completed</div>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">⚡</div>
+                    <div class="stat-content">
+                        <div class="stat-value" id="avg-response">1.2s</div>
+                        <div class="stat-label">Avg Response Time</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Agent Categories -->
+            <div class="agent-categories">
+                <div class="category-tabs">
+                    <button class="tab-btn active" data-category="all">All Agents</button>
+                    <button class="tab-btn" data-category="core">Core Agents</button>
+                    <button class="tab-btn" data-category="specialist">Specialists</button>
+                    <button class="tab-btn" data-category="custom">Custom</button>
+                </div>
+
+                <!-- Agents Grid -->
+                <div class="agents-grid" id="agents-grid">
+                    <!-- Core Agents -->
+                    <div class="agent-card core-agent" data-agent="senior-developer">
+                        <div class="agent-header">
+                            <div class="agent-avatar">👨‍💻</div>
+                            <div class="agent-status online"></div>
+                        </div>
+                        <div class="agent-info">
+                            <h3>Senior Developer</h3>
+                            <p>Expert code implementation, architecture design, and best practices</p>
+                            <div class="agent-tags">
+                                <span class="tag">Core</span>
+                                <span class="tag">Active</span>
+                            </div>
+                        </div>
+                        <div class="agent-stats">
+                            <div class="stat">
+                                <span class="stat-label">Tasks</span>
+                                <span class="stat-value">42</span>
+                            </div>
+                            <div class="stat">
+                                <span class="stat-label">Avg Time</span>
+                                <span class="stat-value">1.8s</span>
+                            </div>
+                            <div class="stat">
+                                <span class="stat-label">Success Rate</span>
+                                <span class="stat-value">98%</span>
+                            </div>
+                        </div>
+                        <div class="agent-actions">
+                            <button class="btn-secondary agent-action" data-action="configure">Configure</button>
+                            <button class="btn-secondary agent-action" data-action="test">Test</button>
+                            <button class="btn-secondary agent-action" data-action="logs">Logs</button>
+                        </div>
+                    </div>
+
+                    <div class="agent-card core-agent" data-agent="architecture-agent">
+                        <div class="agent-header">
+                            <div class="agent-avatar">🏗️</div>
+                            <div class="agent-status online"></div>
+                        </div>
+                        <div class="agent-info">
+                            <h3>Architecture Agent</h3>
+                            <p>System design patterns, architectural decisions, and scalability planning</p>
+                            <div class="agent-tags">
+                                <span class="tag">Core</span>
+                                <span class="tag">Active</span>
+                            </div>
+                        </div>
+                        <div class="agent-stats">
+                            <div class="stat">
+                                <span class="stat-label">Tasks</span>
+                                <span class="stat-value">28</span>
+                            </div>
+                            <div class="stat">
+                                <span class="stat-label">Avg Time</span>
+                                <span class="stat-value">2.1s</span>
+                            </div>
+                            <div class="stat">
+                                <span class="stat-label">Success Rate</span>
+                                <span class="stat-value">96%</span>
+                            </div>
+                        </div>
+                        <div class="agent-actions">
+                            <button class="btn-secondary agent-action" data-action="configure">Configure</button>
+                            <button class="btn-secondary agent-action" data-action="test">Test</button>
+                            <button class="btn-secondary agent-action" data-action="logs">Logs</button>
+                        </div>
+                    </div>
+
+                    <div class="agent-card specialist-agent" data-agent="security-expert">
+                        <div class="agent-header">
+                            <div class="agent-avatar">🔒</div>
+                            <div class="agent-status online"></div>
+                        </div>
+                        <div class="agent-info">
+                            <h3>Security Expert</h3>
+                            <p>Vulnerability analysis, secure coding practices, and penetration testing</p>
+                            <div class="agent-tags">
+                                <span class="tag">Specialist</span>
+                                <span class="tag">Active</span>
+                            </div>
+                        </div>
+                        <div class="agent-stats">
+                            <div class="stat">
+                                <span class="stat-label">Tasks</span>
+                                <span class="stat-value">19</span>
+                            </div>
+                            <div class="stat">
+                                <span class="stat-label">Avg Time</span>
+                                <span class="stat-value">3.2s</span>
+                            </div>
+                            <div class="stat">
+                                <span class="stat-label">Success Rate</span>
+                                <span class="stat-value">99%</span>
+                            </div>
+                        </div>
+                        <div class="agent-actions">
+                            <button class="btn-secondary agent-action" data-action="configure">Configure</button>
+                            <button class="btn-secondary agent-action" data-action="test">Test</button>
+                            <button class="btn-secondary agent-action" data-action="logs">Logs</button>
+                        </div>
+                    </div>
+
+                    <div class="agent-card specialist-agent" data-agent="performance-expert">
+                        <div class="agent-header">
+                            <div class="agent-avatar">⚡</div>
+                            <div class="agent-status online"></div>
+                        </div>
+                        <div class="agent-info">
+                            <h3>Performance Expert</h3>
+                            <p>Code optimization, performance analysis, and scalability improvements</p>
+                            <div class="agent-tags">
+                                <span class="tag">Specialist</span>
+                                <span class="tag">Active</span>
+                            </div>
+                        </div>
+                        <div class="agent-stats">
+                            <div class="stat">
+                                <span class="stat-label">Tasks</span>
+                                <span class="stat-value">31</span>
+                            </div>
+                            <div class="stat">
+                                <span class="stat-label">Avg Time</span>
+                                <span class="stat-value">2.8s</span>
+                            </div>
+                            <div class="stat">
+                                <span class="stat-label">Success Rate</span>
+                                <span class="stat-value">97%</span>
+                            </div>
+                        </div>
+                        <div class="agent-actions">
+                            <button class="btn-secondary agent-action" data-action="configure">Configure</button>
+                            <button class="btn-secondary agent-action" data-action="test">Test</button>
+                            <button class="btn-secondary agent-action" data-action="logs">Logs</button>
+                        </div>
+                    </div>
+
+                    <div class="agent-card specialist-agent" data-agent="devops-expert">
+                        <div class="agent-header">
+                            <div class="agent-avatar">🚀</div>
+                            <div class="agent-status online"></div>
+                        </div>
+                        <div class="agent-info">
+                            <h3>DevOps Expert</h3>
+                            <p>CI/CD pipelines, containerization, infrastructure automation</p>
+                            <div class="agent-tags">
+                                <span class="tag">Specialist</span>
+                                <span class="tag">Active</span>
+                            </div>
+                        </div>
+                        <div class="agent-stats">
+                            <div class="stat">
+                                <span class="stat-label">Tasks</span>
+                                <span class="stat-value">24</span>
+                            </div>
+                            <div class="stat">
+                                <span class="stat-label">Avg Time</span>
+                                <span class="stat-value">1.5s</span>
+                            </div>
+                            <div class="stat">
+                                <span class="stat-label">Success Rate</span>
+                                <span class="stat-value">95%</span>
+                            </div>
+                        </div>
+                        <div class="agent-actions">
+                            <button class="btn-secondary agent-action" data-action="configure">Configure</button>
+                            <button class="btn-secondary agent-action" data-action="test">Test</button>
+                            <button class="btn-secondary agent-action" data-action="logs">Logs</button>
+                        </div>
+                    </div>
+
+                    <div class="agent-card specialist-agent" data-agent="qa-tester">
+                        <div class="agent-header">
+                            <div class="agent-avatar">🧪</div>
+                            <div class="agent-status online"></div>
+                        </div>
+                        <div class="agent-info">
+                            <h3>QA Tester</h3>
+                            <p>Test strategy, automated testing, quality assurance processes</p>
+                            <div class="agent-tags">
+                                <span class="tag">Specialist</span>
+                                <span class="tag">Active</span>
+                            </div>
+                        </div>
+                        <div class="agent-stats">
+                            <div class="stat">
+                                <span class="stat-label">Tasks</span>
+                                <span class="stat-value">36</span>
+                            </div>
+                            <div class="stat">
+                                <span class="stat-label">Avg Time</span>
+                                <span class="stat-value">2.3s</span>
+                            </div>
+                            <div class="stat">
+                                <span class="stat-label">Success Rate</span>
+                                <span class="stat-value">94%</span>
+                            </div>
+                        </div>
+                        <div class="agent-actions">
+                            <button class="btn-secondary agent-action" data-action="configure">Configure</button>
+                            <button class="btn-secondary agent-action" data-action="test">Test</button>
+                            <button class="btn-secondary agent-action" data-action="logs">Logs</button>
+                        </div>
+                    </div>
+
+                    <!-- Add more agents as needed -->
+                    <div class="agent-card add-agent-card" id="add-agent-card">
+                        <div class="add-agent-content">
+                            <div class="add-icon">➕</div>
+                            <h3>Create Custom Agent</h3>
+                            <p>Build a specialized agent for your specific needs</p>
+                            <button class="btn-primary">Get Started</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Agent Configuration Modal -->
+    <div id="agent-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modal-title">Agent Configuration</h2>
+                <button class="close-btn" id="close-modal">×</button>
+            </div>
+            <div class="modal-body" id="modal-body">
+                <!-- Content will be loaded dynamically -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Container -->
+    <div id="toast-container" class="toast-container"></div>
+
+    <!-- Scripts -->
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="/js/agents.js"></script>
+</body>
+</html>

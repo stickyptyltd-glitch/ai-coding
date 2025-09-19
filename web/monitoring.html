@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lecheyne AI - Real-time Monitoring</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/monitoring.css">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📊</text></svg>">
+</head>
+<body>
+    <div id="monitoring-app">
+        <!-- Header -->
+        <header class="monitoring-header">
+            <div class="header-content">
+                <div class="logo">
+                    <span class="logo-icon">📊</span>
+                    <span class="logo-text">LECHEYNE AI</span>
+                    <span class="logo-tagline">Real-time Monitoring</span>
+                </div>
+                <div class="header-controls">
+                    <div class="auto-refresh">
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="auto-refresh" checked>
+                            <span class="toggle-slider"></span>
+                        </label>
+                        <span>Auto Refresh</span>
+                    </div>
+                    <button id="clear-all-logs" class="btn-secondary">Clear All</button>
+                    <button id="export-logs" class="btn-secondary">Export</button>
+                    <a href="/" class="icon-btn" title="Back to App">🏠</a>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <div class="monitoring-container">
+            <!-- System Overview -->
+            <div class="system-overview">
+                <div class="overview-card">
+                    <div class="card-header">
+                        <h3>System Status</h3>
+                        <div class="status-indicator online" id="system-status">● Online</div>
+                    </div>
+                    <div class="metrics-grid">
+                        <div class="metric">
+                            <span class="metric-label">CPU Usage</span>
+                            <div class="metric-bar">
+                                <div class="bar-fill" id="cpu-bar" style="width: 15%"></div>
+                            </div>
+                            <span class="metric-value" id="cpu-value">15%</span>
+                        </div>
+                        <div class="metric">
+                            <span class="metric-label">Memory Usage</span>
+                            <div class="metric-bar">
+                                <div class="bar-fill" id="memory-bar" style="width: 42%"></div>
+                            </div>
+                            <span class="metric-value" id="memory-value">42%</span>
+                        </div>
+                        <div class="metric">
+                            <span class="metric-label">Active Connections</span>
+                            <span class="metric-value large" id="connections-value">127</span>
+                        </div>
+                        <div class="metric">
+                            <span class="metric-label">Requests/min</span>
+                            <span class="metric-value large" id="requests-value">324</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="overview-card">
+                    <div class="card-header">
+                        <h3>Service Health</h3>
+                        <button class="btn-sm" id="check-services">Check All</button>
+                    </div>
+                    <div class="services-list">
+                        <div class="service-item">
+                            <div class="service-status online"></div>
+                            <span class="service-name">Web Server</span>
+                            <span class="service-uptime">99.9%</span>
+                        </div>
+                        <div class="service-item">
+                            <div class="service-status online"></div>
+                            <span class="service-name">AI Agent</span>
+                            <span class="service-uptime">99.7%</span>
+                        </div>
+                        <div class="service-item">
+                            <div class="service-status online"></div>
+                            <span class="service-name">Tool Chains</span>
+                            <span class="service-uptime">98.9%</span>
+                        </div>
+                        <div class="service-item">
+                            <div class="service-status warning"></div>
+                            <span class="service-name">Memory Manager</span>
+                            <span class="service-uptime">97.2%</span>
+                        </div>
+                        <div class="service-item">
+                            <div class="service-status online"></div>
+                            <span class="service-name">Job Queue</span>
+                            <span class="service-uptime">99.1%</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Log Viewers -->
+            <div class="log-section">
+                <div class="log-tabs">
+                    <button class="tab-btn active" data-tab="all">All Logs</button>
+                    <button class="tab-btn" data-tab="errors">Errors</button>
+                    <button class="tab-btn" data-tab="warnings">Warnings</button>
+                    <button class="tab-btn" data-tab="system">System</button>
+                    <button class="tab-btn" data-tab="agents">Agents</button>
+                    <button class="tab-btn" data-tab="performance">Performance</button>
+                </div>
+
+                <div class="log-controls">
+                    <div class="search-controls">
+                        <input type="text" id="log-search" placeholder="Search logs...">
+                        <button class="search-btn">🔍</button>
+                    </div>
+                    <div class="filter-controls">
+                        <select id="log-level" class="filter-select">
+                            <option value="all">All Levels</option>
+                            <option value="debug">Debug</option>
+                            <option value="info">Info</option>
+                            <option value="warn">Warning</option>
+                            <option value="error">Error</option>
+                        </select>
+                        <select id="time-range" class="filter-select">
+                            <option value="live">Live</option>
+                            <option value="1h">Last Hour</option>
+                            <option value="24h">Last 24 Hours</option>
+                            <option value="7d">Last 7 Days</option>
+                        </select>
+                        <button id="pause-logs" class="btn-sm">⏸️ Pause</button>
+                    </div>
+                </div>
+
+                <div class="log-viewer" id="log-viewer">
+                    <div class="log-content" id="log-content">
+                        <!-- Logs will be populated here -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Real-time Charts -->
+            <div class="charts-section">
+                <div class="chart-card">
+                    <div class="chart-header">
+                        <h3>CPU & Memory Usage</h3>
+                        <div class="chart-legend">
+                            <span class="legend-item"><span class="legend-color cpu"></span>CPU</span>
+                            <span class="legend-item"><span class="legend-color memory"></span>Memory</span>
+                        </div>
+                    </div>
+                    <div class="chart-content">
+                        <canvas id="system-chart" width="400" height="200"></canvas>
+                    </div>
+                </div>
+
+                <div class="chart-card">
+                    <div class="chart-header">
+                        <h3>Request Rate & Response Time</h3>
+                        <div class="chart-legend">
+                            <span class="legend-item"><span class="legend-color requests"></span>Requests/min</span>
+                            <span class="legend-item"><span class="legend-color response"></span>Response Time (ms)</span>
+                        </div>
+                    </div>
+                    <div class="chart-content">
+                        <canvas id="performance-chart" width="400" height="200"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Active Processes -->
+            <div class="processes-section">
+                <div class="processes-card">
+                    <div class="card-header">
+                        <h3>Active Processes</h3>
+                        <button class="btn-sm" id="refresh-processes">Refresh</button>
+                    </div>
+                    <div class="processes-table">
+                        <div class="table-header">
+                            <div class="col-name">Process</div>
+                            <div class="col-status">Status</div>
+                            <div class="col-cpu">CPU</div>
+                            <div class="col-memory">Memory</div>
+                            <div class="col-uptime">Uptime</div>
+                            <div class="col-actions">Actions</div>
+                        </div>
+                        <div class="table-body" id="processes-list">
+                            <!-- Processes will be populated here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Error Analysis -->
+            <div class="error-analysis">
+                <div class="analysis-card">
+                    <div class="card-header">
+                        <h3>Error Analysis</h3>
+                        <div class="error-summary">
+                            <span class="error-count" id="error-count">3 errors</span>
+                            <span class="error-timeframe">in last hour</span>
+                        </div>
+                    </div>
+                    <div class="error-breakdown">
+                        <div class="error-category">
+                            <div class="category-header">
+                                <span class="category-icon">🔴</span>
+                                <span class="category-name">Critical Errors</span>
+                                <span class="category-count">1</span>
+                            </div>
+                            <div class="error-item">
+                                <span class="error-time">14:32:15</span>
+                                <span class="error-message">Memory allocation failed in multi-agent system</span>
+                                <button class="error-details">Details</button>
+                            </div>
+                        </div>
+
+                        <div class="error-category">
+                            <div class="category-header">
+                                <span class="category-icon">🟡</span>
+                                <span class="category-name">Warnings</span>
+                                <span class="category-count">2</span>
+                            </div>
+                            <div class="error-item">
+                                <span class="error-time">14:28:42</span>
+                                <span class="error-message">High response time detected (3.2s)</span>
+                                <button class="error-details">Details</button>
+                            </div>
+                            <div class="error-item">
+                                <span class="error-time">14:15:11</span>
+                                <span class="error-message">API rate limit approaching (85%)</span>
+                                <button class="error-details">Details</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Error Details Modal -->
+    <div id="error-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="error-modal-title">Error Details</h2>
+                <button class="close-btn" id="close-error-modal">×</button>
+            </div>
+            <div class="modal-body" id="error-modal-body">
+                <!-- Error details will be loaded here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="/js/monitoring.js"></script>
+</body>
+</html>
